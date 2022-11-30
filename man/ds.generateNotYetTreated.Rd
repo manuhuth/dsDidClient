@@ -17,9 +17,6 @@ ds.generateNotYetTreated(df, name_variable, t, g, newobj, datasources = NULL)
 
 \item{form}{formula used for glm}
 }
-\value{
-
-}
 \description{
 match it function (pooled)
 }

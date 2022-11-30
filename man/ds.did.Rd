@@ -6,16 +6,14 @@
 client side function ...}
 \usage{
 ds.did(
-  data,
-  yname,
-  tname,
-  idname,
-  gname,
-  t_periods,
-  g_periods,
+  data = NULL,
+  yname = NULL,
+  tname = NULL,
+  idname = NULL,
+  gname = NULL,
+  t_periods = NULL,
+  g_periods = NULL,
   xformla = NULL,
-  panel = TRUE,
-  allow_unbalanced_panel = FALSE,
   control_group = "notyettreated",
   base_period = "varying",
   anticipation = 0,
@@ -26,7 +24,9 @@ ds.did(
   clustervars = NULL,
   est_method = "dr",
   maxit = 10000,
-  datasources = NULL
+  seed_append = 12345,
+  datasources = NULL,
+  clear_console = FALSE
 )
 }
 \arguments{
@@ -35,9 +35,6 @@ ds.did(
 \item{pos}{distance measure}
 
 \item{form}{formula}
-}
-\value{
-
 }
 \description{
 Compute did estimate

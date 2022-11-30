@@ -5,6 +5,7 @@
 \title{generate prop scores server side}
 \usage{
 ds.AppendInfluence(
+  seed,
   df,
   influences,
   id_period_vector,
@@ -23,9 +24,6 @@ ds.AppendInfluence(
 \item{pos}{distance measure}
 
 \item{form}{formula used for glm}
-}
-\value{
-
 }
 \description{
 generate prop scores server side

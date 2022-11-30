@@ -17,9 +17,6 @@ ds.multiplierBootstrap(matrix, n_iterations, datasources = NULL)
 
 \item{form}{formula used for glm}
 }
-\value{
-
-}
 \description{
 generate prop scores server side
 }

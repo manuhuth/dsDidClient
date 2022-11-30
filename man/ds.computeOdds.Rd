@@ -17,9 +17,6 @@ ds.computeOdds(name_propensities, name_C, newobj = NULL, datasources = NULL)
 
 \item{form}{formula used for glm}
 }
-\value{
-
-}
 \description{
 generate prop scores server side
 }

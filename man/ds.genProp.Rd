@@ -25,9 +25,6 @@ ds.genProp(
 
 \item{pos}{distance measure}
 }
-\value{
-
-}
 \description{
 generate prop scores server side
 }

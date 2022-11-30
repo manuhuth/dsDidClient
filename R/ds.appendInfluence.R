@@ -8,7 +8,7 @@
 #'
 #' @return
 #' @export
-ds.AppendInfluence <- function(df, influences, id_period_vector, column,
+ds.AppendInfluence <- function(seed, df, influences, id_period_vector, column,
                                   newobj = NULL,
                                   datasources = NULL){
 
@@ -17,7 +17,7 @@ ds.AppendInfluence <- function(df, influences, id_period_vector, column,
   }
 
   # first call
-  cally <- call("AppendInfluenceDS", df, influences, id_period_vector, column)
+  cally <- call("AppendInfluenceDS", seed, df, influences, id_period_vector, column)
   result <- DSI::datashield.assign.expr(datasources, newobj, cally)
 
 }

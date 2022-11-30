@@ -17,9 +17,6 @@ ds.subsetDf(df, name_variable, value, include_zero, newobj, datasources = NULL)
 
 \item{form}{formula used for glm}
 }
-\value{
-
-}
 \description{
 match it function (pooled)
 }

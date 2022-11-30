@@ -8,60 +8,66 @@
 #' @return
 #' @export
 
-ds.did <- function(data, yname, tname, idname, gname, t_periods, g_periods,
+ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname = NULL,
+                   t_periods = NULL, g_periods = NULL,
                    xformla = NULL,
-                   panel = TRUE, allow_unbalanced_panel = FALSE,
                    control_group = "notyettreated",
                    base_period = "varying",
                    anticipation = 0, alpha = 0.05,
-                   bstrap = FALSE, biters=1000, cband = TRUE, clustervars = NULL,
-                   est_method = "dr", maxit = 10000,
-                   datasources = NULL) {
-  #TODOs
+                   bstrap = FALSE, biters = 1000, cband = TRUE, clustervars = NULL,
+                   est_method = "dr", maxit = 10000, seed_append=12345,
+                   datasources = NULL, clear_console = FALSE) {
+  # TODO
 
-  #list of t and g created automatically
-  #create input checks (are all inputs of ds.did valid) -> for example: create warning if t=1 is in "varying" period
-  #create input checks for all ds functions
-  #write proper docstrings
-
-  #panel input currently not implemented
-  #allow_unbalanced_panel input currently not implemented
-
+  # write proper docstrings
 
   #-------------------------------Checks of inputs------------------------------
+  #------------------------------Check that inputs are given (NULL check)-------
 
   #- Check for data sources
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
 
-  if(!(is.list(datasources) && all(unlist(lapply(datasources, function(d) {methods::is(d,"DSConnection")}))))){
-    stop("The 'datasources' were expected to be a list of DSConnection-class objects", call.=FALSE)
+  if (!(is.list(datasources) && all(unlist(lapply(datasources, function(d) {
+    methods::is(d, "DSConnection")
+  }))))) {
+    stop("The 'datasources' were expected to be a list of DSConnection-class objects", call. = FALSE)
   }
 
+  # check that ever input is given to the function
+  necessary_inputs <- c("data", "yname", "tname", "idname", "gname", "t_periods", "g_periods")
+  for (i in necessary_inputs) {
+    if (is.null(i)) {
+      stop(paste0("Please provide the name of the input object ", i), call. = FALSE)
+    }
+  }
 
-  #TODO
-  #check that all relevant names are within each servers columns
+  # check that data is defined on the servers
+  # isDefined(datasources, data)
 
+  # TODO
+  # check that all relevant names are within each servers columns
 
-  #TODO
-  #check that other inputs are valid
-
-
-
-
+  #---------------Sort data-----------------------------------------------------
   # sort data frame by first id and second time
   vec_sort <- paste0("c(", data, "$", idname, ",", data, "$", tname, ")")
 
-  ds.dataFrameSort(df.name = data, sort.key.name = vec_sort, newobj = "sorted_data",
-                   datasources = datasources)
+  ds.dataFrameSort(
+    df.name = data, sort.key.name = vec_sort, newobj = "sorted_data_missing",
+    datasources = datasources
+  )
 
-  ds.completeCases(x1 = "sorted_data", newobj = "sorted_data",
-                   datasources = datasources)
+  #---------------remove missing values-----------------------------------------
+  ds.completeCases(
+    x1 = "sorted_data_missing", newobj = "sorted_data",
+    datasources = datasources
+  )
 
-  if (is.null(xformla)){
-   xformla_paste <- ""
-  } else{
+  #---------------process information about covariates--------------------------
+  if (is.null(xformla)) {
+    xformla_paste <- ""
+  } else {
     xformla_paste <- xformla
   }
 
@@ -75,34 +81,33 @@ ds.did <- function(data, yname, tname, idname, gname, t_periods, g_periods,
   formula_logistic_model <- as.formula(paste("G_dummy", "~ constant +", xformla_paste, "-1"))
 
 
+  #------------remove first period as treatment period if varying base period---
   if (base_period == "varying") {
-    #check if 1 is in t; if yes, delete it
+    t_periods <- t_periods[t_periods != 1]
   }
 
-  #get unique values of g and t periods? Guess that's not possible? -> inputs
 
+  #---------------Start did algorithm-------------------------------------------
   index_iteration <- 0
-
   out <- c() # creates vector that is used for output all ATTs, SEs and CIs
-  for (g in g_periods){
-    for (t in t_periods){
-
-
-
-
+  for (g in g_periods) {
+    for (t in t_periods) {
+      if (clear_console) {
+        cat("\014")
+      }
 
       index_iteration <- index_iteration + 1
 
-      #varying base periods or universal ones; for explanaition see original paper https://github.com/bcallaway11/did/blob/master/R/att_gt.R
-      if (base_period == "varying"){
-        if (g <=t){
+      # varying base periods or universal ones; for explanation see original paper https://github.com/bcallaway11/did/blob/master/R/att_gt.R
+      if (base_period == "varying") {
+        if (g <= t) {
           control_period <- g - anticipation - 1
-        } else{
+        } else {
           control_period <- t - 1
         }
-      } else if (base_period == "universal"){
+      } else if (base_period == "universal") {
         control_period <- g - anticipation - 1
-      } else{
+      } else {
         stop("base_period must either be universal or varying")
       }
 
@@ -120,101 +125,116 @@ ds.did <- function(data, yname, tname, idname, gname, t_periods, g_periods,
       #                   Boolean.operator = "==", newobj = "df_g",
       #                   datasources= connections)
 
-      if ((control_group == "nevertreated") ){
-        #TODO recheck function
+      if ((control_group == "nevertreated")) {
         ds.subsetDf("sorted_data", gname, g,
           include_zero = TRUE, newobj = "df_g",
           datasources = datasources
         ) # dummy function because df subsetting does not work with DSLite; MUST be replaced
-      } else if (control_group == "notyettreated"){
-        #TODO recheck function
-        ds.generateNotYetTreated("sorted_data", gname, t, g, newobj = "df_g",
-                                 datasources=datasources) #not yet treatd values for g are already set to zero
-
+      } else if (control_group == "notyettreated") {
+        ds.generateNotYetTreated("sorted_data", gname, t, g,
+          newobj = "df_g",
+          datasources = datasources
+        ) # not yet treatd values for g are already set to zero
       }
 
-
-
-      #TODO
-      #check if all studies have sufficient many individuals in -> otherwise drop this study for the
-      #period/treatment time -> at least 5?
-      ds.subsetDf("df_g", tname, t,# create observations only from the current period t
+      ds.subsetDf("df_g", tname, t, # create observations only from the current period t
         include_zero = FALSE, newobj = "df_g_t_current",
         datasources = datasources
       ) # dummy function because df subsetting does not work with DSLite; MUST be replaced
 
+      # get datasources that have enough information - if number is too low, code will fail
+      valid_treated <- ds.enoughIndividuals("df_g_t_current",
+        colname = "treat",
+        value = "1",
+        datasources = datasources
+      )
 
-      #create vector with ids that are used within this iteration
-      cols_current <- ds.colnames("df_g_t_current", datasources = datasources)[[1]] #get all columns
-      indices_id <- match(idname, cols_current) #get position of id column
+      valid_untreated <- ds.enoughIndividuals("df_g_t_current",
+        colname = "treat",
+        value = "0",
+        datasources = datasources
+      )
 
-      ds.dataFrameSubset( #create actual vector
+      valid_datasources_g_t <- as.vector(do.call(rbind, valid_treated)) * as.vector(do.call(rbind, valid_untreated)) * (1:length(valid_treated))
+
+      # skip if no valid datasources
+      if (sum(valid_datasources_g_t) == 0) {
+        warning(paste0("Not enough observations in any of the datasources for treatment period g=", g, " and period t=", t, ". The analysis was only conducted for valid periods."))
+        next
+      }
+
+      datasources_subsetted <<- datasources[valid_datasources_g_t[valid_datasources_g_t != 0]]
+
+      # create vector with ids that are used within this iteration
+      cols_current <- ds.colnames("df_g_t_current", datasources = datasources_subsetted)[[1]] # get all columns
+      indices_id <- match(idname, cols_current) # get position of id column
+
+      ds.dataFrameSubset( # create actual vector
         df.name = "df_g_t_current",
-        V1.name = paste0("df_g_t_current$", yname), #just dummy variables such that all rows are true
+        V1.name = paste0("df_g_t_current$", yname), # just dummy variables such that all rows are true
         V2.name = paste0("df_g_t_current$", yname),
         Boolean.operator = "==",
         keep.cols = indices_id,
         newobj = "ids_g_t",
-        datasources = datasources,
+        datasources = datasources_subsetted,
       )
 
+      if (clear_console) {
+        cat("\014")
+      }
 
-      length_ids <- ds.length("ids_g_t",  datasources = datasources)
+      length_ids <- ds.length("ids_g_t", datasources = datasources_subsetted)
 
 
-      #TODO
-      #check if all studies have sufficient many individuals in -> otherwise drop this study for the
-      #period/treatment time -> at least 5? -> see above
       ds.subsetDf("df_g", tname, control_period, # create observations from the lag period that is used as period before the treatment
         include_zero = FALSE, newobj = "df_g_t_lag",
-        datasources = datasources
+        datasources = datasources_subsetted
       ) # dummy function because df subsetting does not work with DSLite; MUST be replaced
 
 
       # create y from the current period t and its lags
       call_y_current <- paste("df_g_t_current$", yname, sep = "")
-      ds.make(call_y_current, newobj = "y_t", datasources = datasources)
+      ds.make(call_y_current, newobj = "y_t", datasources = datasources_subsetted)
+
 
 
       # create y from the lag period
       call <- paste("df_g_t_lag$", yname, sep = "")
-      ds.make(call, newobj = "y_lag", datasources = datasources)
+      ds.make(call, newobj = "y_lag", datasources = datasources_subsetted)
 
       # create vector of outcome differences
-      ds.make("y_t - y_lag", "delta_y", datasources = datasources)
+      ds.make("y_t - y_lag", "delta_y", datasources = datasources_subsetted)
 
 
 
       # create data frame with covariates, X variables, and G
       ds.dataFrame(
         x = c("delta_y", paste0("df_g_t_lag$", gname)),
-        newobj = "df_delta_y_g", datasources = datasources
+        newobj = "df_delta_y_g", datasources = datasources_subsetted
       )
 
 
 
       # save X vector from lag period as matrix of controls; generate object since this subsequently used to compute
-      if (!is.null(xformla)){
+      if (!is.null(xformla)) {
         # Get the names of the x-variables in vector
         columns_x <- labels(terms(as.formula(paste("delta_y ~", xformla))))
 
-        cols <- ds.colnames("df_g_t_lag", datasources = datasources)[[1]]
+        cols <- ds.colnames("df_g_t_lag", datasources = datasources_subsetted)[[1]]
         indices <- match(columns_x, cols)
 
 
-        if ((base_period == "universal") & (t < g)){ #use covariates from earlier period as covariates, which is in this case the current
+        if ((base_period == "universal") & (t < g)) { # use covariates from earlier period as covariates, which is in this case the current
           ds.dataFrameSubset(
             df.name = "df_g_t_current",
-            V1.name = paste0("df_g_t_current$", yname), #just dummy avriables such that all rows are true
+            V1.name = paste0("df_g_t_current$", yname), # just dummy avriables such that all rows are true
             V2.name = paste0("df_g_t_current$", yname),
             Boolean.operator = "==",
             keep.cols = indices,
             newobj = "covariates",
-            datasources = datasources,
+            datasources = datasources_subsetted,
           )
-
-
-        } else{
+        } else {
           ds.dataFrameSubset(
             df.name = "df_g_t_lag",
             V1.name = paste0("df_g_t_lag$", yname),
@@ -222,25 +242,33 @@ ds.did <- function(data, yname, tname, idname, gname, t_periods, g_periods,
             Boolean.operator = "==",
             keep.cols = indices,
             newobj = "covariates",
-            datasources = datasources,
+            datasources = datasources_subsetted,
           )
         }
 
-        #TODO or write disclosiveness checks
-        #change by cbind? and as.matrix?
-        ds.addColumnOnes("covariates", columns =  columns_x,
-                         newobj = "covariates_one", datasources = datasources)
+        if (clear_console) {
+          cat("\014")
+        }
+
+        # TODO or write disclosiveness checks
+        # change by cbind? and as.matrix?
+        ds.addColumnOnes("covariates",
+          columns = columns_x,
+          newobj = "covariates_one", datasources = datasources_subsetted
+        )
 
         ds.cbind(
           x = c("df_delta_y_g", "covariates_one"), newobj = "df_analysis",
-          datasources = datasources
+          datasources = datasources_subsetted
         )
-      }else{#case without covariates
-        columns_df_delta <- ds.colnames("df_delta_y_g")[[1]]
-        #TODO or write disclosiveness checks
-        #change by cbind? and as.matrix?
-        ds.addColumnOnes("df_delta_y_g", columns = columns_df_delta,
-                         newobj = "df_analysis", datasources = datasources)
+      } else { # case without covariates
+        columns_df_delta <- ds.colnames("df_delta_y_g", datasources = datasources_subsetted)[[1]]
+        # TODO or write disclosiveness checks
+        # change by cbind? and as.matrix?
+        ds.addColumnOnes("df_delta_y_g",
+          columns = columns_df_delta,
+          newobj = "df_analysis", datasources = datasources_subsetted
+        )
       }
 
 
@@ -249,55 +277,48 @@ ds.did <- function(data, yname, tname, idname, gname, t_periods, g_periods,
       ds.dataFrameSubset(
         df.name = "df_analysis", V1.name = paste0("df_analysis$", gname), V2.name = "0",
         Boolean.operator = "==", newobj = "df_analysis_non_treated",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
 
-
-
-      if (!is.null(xformla)){#compute expectation
-        #TODO
-        #include checks for overparameterization similar to DID package
+      if (!is.null(xformla)) { # compute expectation
+        # TODO
+        # include checks for overparameterization similar to DID package
 
 
         # run linear regression -> E(delta_y|X, G = 0)
         linear_regression_object <- ds.glm(formula_linear_model,
           data = "df_analysis_non_treated",
           family = "gaussian",
-          maxit = maxit
+          maxit = maxit,
+          datasources=datasources_subsetted
         )
-
-
 
         betas_lin_reg <- linear_regression_object$coefficients[, c(1)]
 
-
-        #TODO
-        #include checks -> especially that none of both can be the identity matrix
-        #maybe at least 5x5 matrix?
-        ds.multiplyMatrixVector(betas_lin_reg, "covariates_one",
+        ds.multiplyMatrixMatrix("covariates_one", betas_lin_reg,
           newobj = "delta_y_fitted",
-          datasources = datasources
+          datasources = datasources_subsetted
         )
-      } else{#if no covariates, expectation is just the mean
+      } else { # if no covariates, expectation is just the mean
 
         mean_delta_y <- ds.mean("df_analysis_non_treated$delta_y",
-                                type = "combined",
-                                datasources = datasources)$Global.Mean[1]
+          type = "combined",
+          datasources = datasources_subsetted
+        )$Global.Mean[1]
         ds.rep(
           x1 = eval(paste(mean_delta_y)),
           times = "1",
-          length.out = "delta_y", #very arbitrary what object is used here
+          length.out = "delta_y", # very arbitrary what object is used here
           each = "1",
           source.x1 = "serverside",
           source.times = "serverside",
           source.length.out = "serverside",
           source.each = "serverside",
           newobj = "delta_y_fitted",
-          datasources = datasources
+          datasources = datasources_subsetted
         )
 
-        ds.asMatrix("delta_y_fitted", newobj = "delta_y_fitted", datasources = datasources)
-
+        ds.asMatrix("delta_y_fitted", newobj = "delta_y_fitted", datasources = datasources_subsetted)
       }
 
       # run logit regression on P(G=g |X, G_g + C = 1) -> only treated in g or never treated (observations in df_analysis)
@@ -305,95 +326,93 @@ ds.did <- function(data, yname, tname, idname, gname, t_periods, g_periods,
         var.name = paste0("df_analysis$", gname),
         values2replace.vector = c(g),
         new.values.vector = c(1), newobj = "G_dummy",
-        datasources = datasources
+        datasources = datasources_subsetted
       ) # create variable that is one for treated in g; rest 0
 
       ds.cbind(
         x = c("df_analysis", "G_dummy"), newobj = "df_analysis_logit",
-        datasources = datasources
+        datasources = datasources_subsetted
       ) # create enw data frame with dummy
 
-      if (!is.null(xformla)){
-        #TODO include checks from DID package
+      if (!is.null(xformla)) {
         logit_regression_object <- ds.glm(formula_logistic_model,
           data = "df_analysis_logit",
           family = "binomial", maxit = maxit,
-          viewVarCov = TRUE
+          viewVarCov = TRUE,
+          datasources = datasources_subsetted
         ) # run logistic regression to compute P(G=g |X, G_g + C = 1)
 
-        #TODO
-        #include checks for gen prop function
+
+
         ds.genProp(logit_regression_object$formula, logit_regression_object$coefficients[, c(1)],
           "df_analysis_logit", "propensity_scores",
-          datasources = datasources, invlog = TRUE, constant_in_matrix =TRUE
+          datasources = datasources_subsetted, invlog = TRUE, constant_in_matrix = TRUE
         )
-
-      } else{
+      } else {
         mean_logit <- ds.mean("df_analysis_logit$G_dummy",
-                                 type = "combined",
-                                 datasources = datasources)$Global.Mean[1]
+          type = "combined",
+          datasources = datasources_subsetted
+        )$Global.Mean[1]
         ds.rep(
           x1 = eval(paste(mean_logit)),
           times = "1",
-          length.out = "df_analysis_logit$G_dummy", #very arbitrary what object is used here
+          length.out = "df_analysis_logit$G_dummy", # very arbitrary what object is used here
           each = "1",
           source.x1 = "serverside",
           source.times = "serverside",
           source.length.out = "serverside",
           source.each = "serverside",
           newobj = "propensity_scores",
-          datasources = datasources
+          datasources = datasources_subsetted
         )
 
-        ds.asMatrix("propensity_scores", newobj = "propensity_scores", datasources = datasources)
-
-
+        ds.asMatrix("propensity_scores", newobj = "propensity_scores", datasources = datasources_subsetted)
       }
 
-      #TODO
-      #include checks for odds computations (check if worked properly)
-      ds.computeOdds("propensity_scores", "G_dummy", newobj = "odds", datasources = datasources)
+      if (clear_console) {
+        cat("\014")
+      }
 
-
-      mean_G <- ds.mean("G_dummy", type = "combined", datasources = datasources)$Global.Mean[1]
-
-      mean_odds <- ds.mean("odds", type = "combined",datasources = datasources)$Global.Mean[1] # odds if in control group; else zero
-
-      ds.make("1 - df_analysis_logit$G_dummy", "weights_ols", datasources = datasources)
-      ds.make("weights_ols * propensity_scores", "pscore_tr", datasources = datasources)
-
+      ds.computeOdds("propensity_scores", "G_dummy", newobj = "odds", datasources = datasources_subsetted)
+      mean_G <- ds.mean("G_dummy", type = "combined", datasources = datasources_subsetted)$Global.Mean[1]
+      mean_odds <- ds.mean("odds", type = "combined", datasources = datasources_subsetted)$Global.Mean[1] # odds if in control group; else zero
+      ds.make("1 - df_analysis_logit$G_dummy", "weights_ols", datasources = datasources_subsetted)
+      ds.make("weights_ols * propensity_scores", "pscore_tr", datasources = datasources_subsetted)
 
       #-------------Differentiate with respect to estimators--------------------
-      if (est_method == "reg"){
+      if (est_method == "reg") {
         ds.make("df_analysis_logit$G_dummy * (delta_y)", "att_treat",
-                datasources = datasources
+          datasources = datasources_subsetted
         )
 
         ds.make("odds * (delta_y_fitted)", "att_cont",
-                datasources = datasources
+          datasources = datasources_subsetted
         )
-
       } else if (est_method == "dr") {
 
-          #treatment and control group for dr estimator
-          ds.make("df_analysis_logit$G_dummy * (delta_y - delta_y_fitted)", "att_treat",
-            datasources = datasources
-          )
+        # treatment and control group for dr estimator
+        ds.make("df_analysis_logit$G_dummy * (delta_y - delta_y_fitted)", "att_treat",
+          datasources = datasources_subsetted
+        )
 
-          ds.make("odds * (delta_y - delta_y_fitted)", "att_cont",
-            datasources = datasources
-          )
-      } else if (est_method == "ipw"){
-          #treatment and control group for ipw estimator
-          ds.make("df_analysis_logit$G_dummy * (delta_y)", "att_treat",
-                  datasources = datasources
-          )
+        ds.make("odds * (delta_y - delta_y_fitted)", "att_cont",
+          datasources = datasources_subsetted
+        )
+      } else if (est_method == "ipw") {
+        # treatment and control group for ipw estimator
+        ds.make("df_analysis_logit$G_dummy * (delta_y)", "att_treat",
+          datasources = datasources_subsetted
+        )
 
-          ds.make("odds * (delta_y)", "att_cont",
-                  datasources = datasources
-          )
-      } else{
+        ds.make("odds * (delta_y)", "att_cont",
+          datasources = datasources_subsetted
+        )
+      } else {
         stop("Estimation method must either be reg, dr or ipw.")
+      }
+
+      if (clear_console) {
+        cat("\014")
       }
 
       #-------------------------------------------------------------------------
@@ -409,18 +428,18 @@ ds.did <- function(data, yname, tname, idname, gname, t_periods, g_periods,
       # w.cont = odds
       # dr.att = dr_att
 
-      n <- ds.dim("df_analysis", datasources = datasources)$`dimensions of df_analysis in combined studies`[1]
+      n <- ds.dim("df_analysis", datasources = datasources_subsetted)$`dimensions of df_analysis in combined studies`[1]
 
 
-      #plug-in relevant estimator instead of "dr_att_treat/cont"
+      # plug-in relevant estimator instead of "dr_att_treat/cont"
       mean_att_treat <- ds.mean("att_treat",
         type = "combined",
-        datasources = datasources
+        datasources = datasources_subsetted
       )$Global.Mean[1]
 
       mean_att_cont <- ds.mean("att_cont",
         type = "combined",
-        datasources = datasources
+        datasources = datasources_subsetted
       )$Global.Mean[1]
 
       eta_treat <- mean_att_treat / mean_G
@@ -429,398 +448,411 @@ ds.did <- function(data, yname, tname, idname, gname, t_periods, g_periods,
 
 
       # compute standard errors --------------------------------------------------
-      if (is.null(xformla)){
+      if (is.null(xformla)) {
         ds.rep(
           x1 = "1",
           times = "1",
-          length.out = "weights_ols", #very arbitrary what object is used here
+          length.out = "weights_ols", # very arbitrary what object is used here
           each = "1",
           source.x1 = "serverside",
           source.times = "serverside",
           source.length.out = "serverside",
           source.each = "serverside",
           newobj = "covariates_one",
-          datasources = datasources
+          datasources = datasources_subsetted
         )
 
-        ds.asMatrix("covariates_one", newobj="covariates_one",
-                    datasources = datasources)
+        ds.asMatrix("covariates_one",
+          newobj = "covariates_one",
+          datasources = datasources_subsetted
+        )
       }
 
       # Asymptotic representation of OLS' betas
-      ds.make("weights_ols * covariates_one", newobj = "wols_x", datasources = datasources)
+      ds.make("weights_ols * covariates_one", newobj = "wols_x", datasources = datasources_subsetted)
       ds.make("weights_ols * (delta_y - delta_y_fitted) * covariates_one",
         newobj = "wols_eX",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
 
-      #TODO
-      #check for compute Matrix crossproduct -> at least 5x5? and no identity?
-      crossproduct_AX <- Reduce("+", ds.computeMatrixCrossproduct("wols_x"))
+      # TODO
+      # check for compute Matrix crossproduct -> at least 5x5? and no identity?
+      crossproduct_AX <- Reduce("+", ds.computeMatrixCrossproduct("wols_x",
+        datasources = datasources_subsetted
+      ))
       XpX_inv <- solve(crossproduct_AX / n)
       XpX_vector <- as.vector(XpX_inv)
       nrows <- nrow(XpX_inv)
 
-      #TODO
-      #check for compute Matrix crossproduct -> at least 5x5? and no identity?
+      # TODO
+      # check for compute Matrix crossproduct -> at least 5x5? and no identity?
       ds.multiplyMatrixMatrix("wols_eX", XpX_vector,
         nrow2 = nrows,
-        ncol2 = nrows, newobj = "asy_lin_rep_wols"
+        ncol2 = nrows, newobj = "asy_lin_rep_wols", datasources = datasources_subsetted
       )
 
       # Asymptotic linear representation of logit's beta's
       ds.make("(df_analysis_logit$G_dummy - propensity_scores) * covariates_one",
-        newobj = "score_ps", datasources = datasources
+        newobj = "score_ps", datasources = datasources_subsetted
       )
 
-      if (!is.null(xformla)){
+      if (!is.null(xformla)) {
         hessian_ps <- as.matrix(logit_regression_object$VarCovMatrix) * n
         hessian_ps_vector <- as.vector(hessian_ps)
 
-        #TODO
-        #check for compute Matrix crossproduct -> at least 5x5? and no identity?  see above
+        # TODO
+        # check for compute Matrix crossproduct -> at least 5x5? and no identity?  see above
         ds.multiplyMatrixMatrix("score_ps", hessian_ps_vector,
           nrow2 = nrow(hessian_ps),
           ncol2 = ncol(hessian_ps), newobj = "asy_lin_rep_ps",
-          datasources = datasources
+          datasources = datasources_subsetted
         )
-      } else{
-        hessian_ps <- 1 / ( mean_G * (1-mean_G) )   #n drops our since formula for variance is: 1 / ( n * mean_G * (1-mean_G) ); which we would multiply by n
+      } else {
+        hessian_ps <- 1 / (mean_G * (1 - mean_G)) # n drops our since formula for variance is: 1 / ( n * mean_G * (1-mean_G) ); which we would multiply by n
         hessian_ps_vector <- as.vector(hessian_ps)
-        #TODO
-        #check for compute Matrix crossproduct -> at least 5x5? and no identity?  see above
+        # TODO
+        # check for compute Matrix crossproduct -> at least 5x5? and no identity?  see above
         ds.multiplyMatrixMatrix("score_ps", hessian_ps_vector,
-                                nrow2 = 1,
-                                ncol2 = 1, newobj = "asy_lin_rep_ps",
-                                datasources = datasources
+          nrow2 = 1,
+          ncol2 = 1, newobj = "asy_lin_rep_ps",
+          datasources = datasources_subsetted
         )
+      }
 
+      if (clear_console) {
+        cat("\014")
       }
 
       # Now, the influence function of the "treat" component
       # Leading term of the influence function: no estimation effect
-      #TODO
-      #this will definitely not work, I think.
-      ds.sendToServer(eta_treat, newobj = "eta_treat_server", datasources = datasources)
+
+      # only numbers are possible
+      ds.sendToServer(eta_treat, newobj = "eta_treat_server", datasources = datasources_subsetted)
       ds.make("(att_treat - df_analysis_logit$G_dummy * eta_treat_server)",
         newobj = "inf_treat_1",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
 
       # Estimation effect from beta hat
       # Derivative matrix (k x 1 vector)
       ds.make("df_analysis_logit$G_dummy * covariates_one",
         newobj = "M1_helper",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
 
       # ds.rowColCalc(x = "M1_helper", operation = "colMeans", newobj = "M1",
-      #              datasources = datasources) #only works if enough columns -> due to isVAlid line 40. but should work for already one
+      #              datasources = datasources_subsetted) #only works if enough columns -> due to isVAlid line 40. but should work for already one
 
 
       # Now get the influence function related to the estimation effect related to beta's
       # ds.insertNumberToVector("M1", 0, 0, newobj = "M1_zeros",
-      #                        datasources = datasources)
+      #                        datasources = datasources_subsetted)
       means_M1 <- c()
-      if (!is.null(xformla)){
-        cols_covariates <- ds.colnames("M1_helper")[[1]]
+      if (!is.null(xformla)) {
+        cols_covariates <- ds.colnames("M1_helper", datasources = datasources_subsetted)[[1]]
         for (i in 1:length(cols_covariates)) {
           variable <- paste0("M1_helper$`", cols_covariates[i], "`")
           means_M1[i] <- ds.mean(variable,
             type = "combined",
-            datasources = datasources
+            datasources = datasources_subsetted
           )$Global.Mean[1]
         }
-      } else{
-        means_M1[1] <-  ds.mean("M1_helper",
-                                type = "combined",
-                                datasources = datasources
+      } else {
+        means_M1[1] <- ds.mean("M1_helper",
+          type = "combined",
+          datasources = datasources_subsetted
         )$Global.Mean[1]
       }
 
-      #TODO
-      #this will definitely not work, I think.
-      ds.sendToServer(means_M1, newobj = "M1", datasources = datasources)
-
-      ds.make("asy_lin_rep_wols %*% M1",
+      ds.multiplyMatrixMatrix("asy_lin_rep_wols", means_M1,
         newobj = "inf_treat_2",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
 
       # Influence function for the treated component
 
-      #TODO
-      #check function. ds.make?
+      # TODO
+      # check function. ds.make?
       inf_treat <- ds.computeInfTreatDifference("inf_treat_1", "inf_treat_2",
-        datasources = datasources
+        datasources = datasources_subsetted
       ) # divide by mean of G later
+
       #-----------------------------------------------------------------------------
       # Now, get the influence function of control component
       # Leading term of the influence function: no estimation effect
-      #TODO
-      #this will definitely not work, I think.
-      ds.sendToServer(eta_cont, newobj = "eta_cont_server", datasources = datasources)
+      # TODO
+      # this will definitely not work, I think.
+      ds.sendToServer(eta_cont, newobj = "eta_cont_server",
+                      datasources = datasources_subsetted)
 
       ds.make("(att_cont - odds * eta_cont_server)",
         newobj = "inf_cont_1",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
       # inf.cont.1 <- (dr.att.cont - w.cont * eta.cont)
 
 
       # Estimation effect from gamma hat (pscore)
       # Derivative matrix (k x 1 vector)
-      if (est_method == "dr"){
+      if (est_method == "dr") {
         ds.make("odds * (delta_y -  delta_y_fitted - eta_cont_server) * covariates_one",
           newobj = "M2_helper",
-          datasources = datasources
+          datasources = datasources_subsetted
         )
-
-      } else if(est_method == "ipw"){
+      } else if (est_method == "ipw") {
         ds.make("odds * (delta_y - eta_cont_server) * covariates_one",
-                newobj = "M2_helper",
-                datasources = datasources
+          newobj = "M2_helper",
+          datasources = datasources_subsetted
         )
-
-      } else{
+      } else {
         ds.make("odds  * covariates_one",
-                newobj = "M2_helper",
-                datasources = datasources
+          newobj = "M2_helper",
+          datasources = datasources_subsetted
         )
       }
 
       # rowcolcalc does not work yet
       means_M2 <- c()
-      if (!is.null(xformla)){
-          cols_covariates <- ds.colnames("M2_helper")[[1]]
-          for (i in 1:length(cols_covariates)) {
-            variable <- paste0("M2_helper$`", cols_covariates[i], "`")
-            means_M2[i] <- ds.mean(variable,
-              type = "combined",
-              datasources = datasources
-            )$Global.Mean[1]
-          }
-      } else{
-        means_M2[1] <-  ds.mean("M2_helper",
-                                type = "combined",
-                                datasources = datasources
+      if (!is.null(xformla)) {
+        cols_covariates <- ds.colnames("M2_helper", datasources = datasources_subsetted)[[1]]
+        for (i in 1:length(cols_covariates)) {
+          variable <- paste0("M2_helper$`", cols_covariates[i], "`")
+          means_M2[i] <- ds.mean(variable,
+            type = "combined",
+            datasources = datasources_subsetted
+          )$Global.Mean[1]
+        }
+      } else {
+        means_M2[1] <- ds.mean("M2_helper",
+          type = "combined",
+          datasources = datasources_subsetted
         )$Global.Mean[1]
       }
 
-      #TODO
-      #this will definitely not work, I think.
-      ds.sendToServer(means_M2, newobj = "M2", datasources = datasources)
+
+
+      # TODO
+      # this will definitely not work, I think.
+
+
+      if (clear_console) {
+        cat("\014")
+      }
 
       # Now the influence function related to estimation effect of pscores
 
       if (est_method == "reg") {
-        ds.make("asy_lin_rep_wols %*% M2",
+        ds.multiplyMatrixMatrix("asy_lin_rep_wols", means_M2,
           newobj = "inf_cont_2",
-          datasources = datasources
+          datasources = datasources_subsetted
         )
-      } else{
-        ds.make("asy_lin_rep_ps %*% M2",
-                newobj = "inf_cont_2",
-                datasources = datasources
+      } else {
+        ds.multiplyMatrixMatrix("asy_lin_rep_ps", means_M2,
+          newobj = "inf_cont_2",
+          datasources = datasources_subsetted
         )
       }
-
-
 
       # Estimation Effect from beta hat (weighted OLS)
       ds.make("odds * covariates_one",
         newobj = "M3_helper",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
 
       means_M3 <- c()
-      if (!is.null(xformla)){
-        cols_covariates <- ds.colnames("M3_helper")[[1]]
+      if (!is.null(xformla)) {
+        cols_covariates <- ds.colnames("M3_helper", datasources = datasources_subsetted)[[1]]
         for (i in 1:length(cols_covariates)) {
           variable <- paste0("M3_helper$`", cols_covariates[i], "`")
           means_M3[i] <- ds.mean(variable,
             type = "combined",
-            datasources = datasources
+            datasources = datasources_subsetted
           )$Global.Mean[1]
         }
-      } else{
-        means_M3[1] <-  ds.mean("M3_helper",
-                                type = "combined",
-                                datasources = datasources
+      } else {
+        means_M3[1] <- ds.mean("M3_helper",
+          type = "combined",
+          datasources = datasources_subsetted
         )$Global.Mean[1]
-
       }
 
-      #TODO
-      #this will definitely not work, I think.
-      ds.sendToServer(means_M3, newobj = "M3", datasources = datasources)
-
-      # Now the influence function related to estimation effect of regressions
-      ds.make("asy_lin_rep_wols %*% M3",
+      ds.multiplyMatrixMatrix("asy_lin_rep_wols", means_M3,
         newobj = "inf_cont_3",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
 
       # Influence function for the control component
       # compute in1 + inf2 -> compute difference with function, compute mean, compute inf.control
       ds.make("inf_cont_1 + inf_cont_2",
         newobj = "inf_cont_helper",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
 
-      #TODO
-      #ds.make?
+      # TODO
+      # ds.make?
       inf_control_difference <- ds.computeInfTreatDifference("inf_cont_helper", "inf_cont_3",
-        datasources = datasources
+        datasources = datasources_subsetted
       )
-      odds_mean <- ds.mean("odds", type = "combined")$Global.Mean[1]
+      odds_mean <- ds.mean("odds", type = "combined", datasources = datasources_subsetted)$Global.Mean[1]
 
       inf_control <- unlist(inf_control_difference) / odds_mean
 
+      if (clear_console) {
+        cat("\014")
+      }
+
       # get the influence function of the DR estimator (put all pieces together)
-      if (est_method == "dr"){
+      if (est_method == "dr") {
         dr_att_inf_func <- unlist(inf_treat) / mean_G - inf_control # divide by mean of G here because we cannot do it when inf_treat is created
-      } else if(est_method %in%  c("ipw","reg")) {
-        ds.make(paste0("inf_treat_1 / ", mean_G) , newobj = "inf_treat", datasources = datasources)
-        ds.make(paste0("inf_cont_helper / ", odds_mean), newobj = "inf_control", datasources = datasources)
+      } else if (est_method %in% c("ipw", "reg")) {
+        ds.make(paste0("inf_treat_1 / ", mean_G), newobj = "inf_treat", datasources = datasources_subsetted)
+        ds.make(paste0("inf_cont_helper / ", odds_mean), newobj = "inf_control", datasources = datasources_subsetted)
 
 
         dr_att_inf_func <- unlist(ds.computeInfTreatDifference("inf_treat", "inf_control",
-                                                        datasources = datasources
-                                                        ))
+          datasources = datasources_subsetted
+        ))
       }
       #-----------------------------------------------------------------------------
-      #create empty matrix with all ids for influence
+      # create empty matrix with all ids for influence
       n_columns <- length(t_periods) * length(g_periods)
 
-      if (index_iteration == 1){
-        ds.createEmptyIdMatrix("sorted_data", idname, n_columns,
-                              newobj = "influence_matrix", datasources=datasources)
+      if (index_iteration == 1) {
+        ds.createEmptyIdMatrix("sorted_data", idname, paste(n_columns),
+          newobj = "influence_matrix", datasources = datasources_subsetted
+        )
       }
 
+      # send dr_att_inf_func and ids to servers loop over connections and ids_length and append to matrix
+      last_index <- 0 # initialize index of individuals in dr_att_inf_func (they are ordered)
 
-
-      #send dr_att_inf_func and ids to servers loop over connections and ids_length and append to matrix
-      last_index <- 0 #initialize index of individuals in dr_att_inf_func (they are ordered)
-
-      for (i in 1:length(datasources)){
-        first_index <- last_index + 1 #choose next index
+      for (i in 1:length(datasources_subsetted)) {
+        first_index <- last_index + 1 # choose next index
         last_index <- last_index + length_ids[[i]]
-        influence_source <- dr_att_inf_func[(first_index:last_index)] / n  #divide by (which is n1) in the paper
+        influence_source <- dr_att_inf_func[(first_index:last_index)] / n # divide by (which is n1) in the paper
 
-        #TODO recheck function
-        ds.AppendInfluence("influence_matrix", influence_source, "ids_g_t",
-                           index_iteration,
-                           newobj = "influence_matrix",
-                           datasources=datasources[[i]])
-
+        # TODO recheck function
+        ds.AppendInfluence(seed_append, "influence_matrix", influence_source, "ids_g_t",
+          index_iteration,
+          newobj = "influence_matrix",
+          datasources = datasources_subsetted[[i]]
+        )
       }
-
 
       # Estimate of asymptotic standard error
       se_dr_att <- (t(dr_att_inf_func) %*% dr_att_inf_func / n)^0.5 / sqrt(n) #-> divide by 40 (total numbers of individuals)
 
-      z_value <- qnorm(1-alpha/2)
+      z_value <- qnorm(1 - alpha / 2)
 
       length_ci <- z_value * se_dr_att
       upper_bound <- dr_att + length_ci
       lower_bound <- dr_att - length_ci
 
       # result <- DSI::datashield.assign(datasources, "dp", cally)
-      asymptotic <- c("Group" = g, "Time" = t,
+      asymptotic <- c(
+        "Group" = g, "Time" = t,
         "ATT" = dr_att, "SE" = se_dr_att, "[95% Pointwise" = lower_bound,
         "Conf. Band]" = upper_bound
       )
 
-      #if (g <= t){ #include only post-treatment periods
+      # if (g <= t){ #include only post-treatment periods
       out <- rbind(out, asymptotic)
-      #}
-    }#end t
-  }#end g
+      # }
+    } # end t
+  } # end g
 
-  dimensions_influence <- ds.dim("influence_matrix", datasources=datasources)
+  dimensions_influence <- ds.dim("influence_matrix", datasources = datasources_subsetted)
   n_global <- dimensions_influence[[length(dimensions_influence)]][1]
-  n_std_error <- n_global #is overwritten if clustered standard errors; otherwise we cluster at the individual level
+  n_std_error <- n_global # is overwritten if clustered standard errors; otherwise we cluster at the individual level
 
-  ds.make( paste0("influence_matrix *", n_global), newobj = "influence_matrix_adjusted",
-           datasources = datasources) #adjust by multiplying with total amount (done in original package with n)
+  ds.make(paste0("influence_matrix *", n_global),
+    newobj = "influence_matrix_adjusted",
+    datasources = datasources_subsetted
+  ) # adjust by multiplying with total amount (done in original package with n)
 
   name_influence_use <- "influence_matrix_adjusted"
 
-  #bootstrap
-  if (bstrap){
+  # bootstrap
+  if (bstrap) {
+    if (!is.null(clustervars)) { # clusters are only possible within a server
+      #---------this needs to be changed to allow for global clusters--------- -> ds.meanByClass only allows for 3 clusters
+      # TODO check function
+      ds.clusterInfluenceFunction("sorted_data", "influence_matrix_adjusted",
+        clustervars,
+        idname,
+        newobj = "influence_matrix_adjusted_cluster",
+        datasources = datasources_subsetted
+      )
 
-      if (!is.null(clustervars)){ #clusters are only possible within a server
-        #---------this needs to be changed to allow for global clusters--------- -> ds.meanByClass only allows for 3 clusters
-        #TODO check function
-        ds.clusterInfluenceFunction("sorted_data", "influence_matrix_adjusted",
-                                    clustervars,
-                                    idname,
-                                    newobj = "influence_matrix_adjusted_cluster",
-                                    datasources = datasources)
+
+      name_influence_use <- "influence_matrix_adjusted_cluster"
+      dimensions_influence_clust <- ds.dim("influence_matrix_adjusted_cluster",
+        datasources = datasources_subsetted
+      )
+      n_std_error <- dimensions_influence_clust[[length(dimensions_influence_clust)]][1]
+
+      #-----------------------------------------------------------------------
+    }
+
+    bootstrap_samples <- ds.multiplierBootstrap(name_influence_use, biters,
+      datasources = datasources_subsetted
+    ) # everything still needs to be divided by number of cluster
 
 
-        name_influence_use <- "influence_matrix_adjusted_cluster"
-        dimensions_influence_clust <- ds.dim("influence_matrix_adjusted_cluster", datasources=datasources)
-        n_std_error <- dimensions_influence_clust[[length(dimensions_influence_clust)]][1]
+    bootstrap_sample_combined <- Reduce("+", bootstrap_samples) / n_std_error
 
-        #-----------------------------------------------------------------------
+    bres <- sqrt(n_std_error) * bootstrap_sample_combined
+
+
+    # from main package
+    # for uniform confidence band
+    # compute new critical value
+    # see paper for details
+    b_sigma <- apply(
+      bres, 2,
+      function(b) {
+        (quantile(b, .75, type = 1, na.rm = T) -
+          quantile(b, .25, type = 1, na.rm = T)) / (qnorm(.75) - qnorm(.25))
       }
+    )
+    se <- as.numeric(b_sigma) / sqrt(n_std_error)
 
-      bootstrap_samples <- ds.multiplierBootstrap(name_influence_use, biters,
-                                                   datasources=datasources) #everything still needs to be divided by number of cluster
+    b_sigma[b_sigma <= sqrt(.Machine$double.eps) * 10] <- NA
 
-
-      bootstrap_sample_combined <- Reduce('+', bootstrap_samples) / n_std_error
-
-      bres <- sqrt(n_std_error) * bootstrap_sample_combined
-
-
-      #from main package
-      # for uniform confidence band
-      # compute new critical value
-      # see paper for details
-      b_sigma <- apply(bres, 2,
-                      function(b) (quantile(b, .75, type=1, na.rm = T) -
-                                     quantile(b, .25, type=1, na.rm = T))/(qnorm(.75) - qnorm(.25)))
-      se <- as.numeric(b_sigma) / sqrt(n_std_error)
-
-      b_sigma[b_sigma <= sqrt(.Machine$double.eps)*10] <- NA
-
-      if (cband) {
+    if (cband) {
       # sup-t confidence band
-        bT <- apply(bres, 1, function(b) max( abs(b/b_sigma), na.rm = TRUE))
-        z_value <<- quantile(bT, 1-alpha, type=1, na.rm = T)
-        if(z_value >= 7){
-          warning("Simultaneous critical value is arguably `too large' to be realible. This usually happens when number of observations per group is small and/or there is no much variation in outcomes.")
-        }
+      bT <- apply(bres, 1, function(b) max(abs(b / b_sigma), na.rm = TRUE))
+      z_value <- quantile(bT, 1 - alpha, type = 1, na.rm = T)
+      if (z_value >= 7) {
+        warning("Simultaneous critical value is arguably `too large' to be realible. This usually happens when number of observations per group is small and/or there is no much variation in outcomes.")
       }
+    }
 
-      lower_bounds <- out[,"ATT"] - z_value * se
-      upper_bounds <- out[,"ATT"] + z_value * se
+    lower_bounds <- out[, "ATT"] - z_value * se
+    upper_bounds <- out[, "ATT"] + z_value * se
 
-      #overwrite asymptotic values
-      out[,"SE"] <- se
-      out[,"[95% Pointwise"] <- lower_bounds
-      out[,"Conf. Band]"] <- upper_bounds
-
+    # overwrite asymptotic values
+    out[, "SE"] <- se
+    out[, "[95% Pointwise"] <- lower_bounds
+    out[, "Conf. Band]"] <- upper_bounds
   }
 
   #-------------------Wald-Test for parallel trend assumption-------------------
-  #TODO check function; as above
-  V <- Reduce("+", ds.computeMatrixCrossproduct("influence_matrix_adjusted")) / n_global
+  # TODO check function; as above
+
+  V <- Reduce("+", ds.computeMatrixCrossproduct("influence_matrix_adjusted", datasources = datasources_subsetted)) / n_global
   V1 <- V
   pre <- out[, "Group"] > out[, "Time"]
   pre_att <- as.matrix(out[pre, "ATT"])
-  pre_V <- as.matrix(V[pre,pre])
+  pre_V <- as.matrix(V[pre, pre])
 
   #-----------start from original package --------------------------------------
   # check if there are actually any pre-treatment periods
   if (length(pre_V) == 0) {
     message("No pre-treatment periods to test")
-    W  <- NULL
+    W <- NULL
     W_pval <- NULL
-  } else if(sum(is.na(pre_V))) {
+  } else if (sum(is.na(pre_V))) {
     warning("Not returning pre-test Wald statistic due to NA pre-treatment values")
     W <- NULL
     W_pval <- NULL
@@ -831,9 +863,9 @@ ds.did <- function(data, yname, tname, idname, gname, t_periods, g_periods,
     W_pval <- NULL
   } else {
     # everything is working...
-    W <- n_global*t(pre_att)%*%solve(pre_V)%*%pre_att
+    W <- n_global * t(pre_att) %*% solve(pre_V) %*% pre_att
     q <- length(pre) # number of restrictions
-    W_pval <- round(1-pchisq(W,q),5)
+    W_pval <- round(1 - pchisq(W, q), 5)
   }
   #---------End from original package-------------------------------------------
 

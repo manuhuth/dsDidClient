@@ -17,9 +17,6 @@ ds.computeInfTreatDifference(inf_1, inf_2, datasources = NULL)
 
 \item{form}{formula used for glm}
 }
-\value{
-
-}
 \description{
 generate prop scores server side
 }

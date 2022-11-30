@@ -23,9 +23,6 @@ ds.createEmptyIdMatrix(
 
 \item{form}{formula used for glm}
 }
-\value{
-
-}
 \description{
 generate prop scores server side
 }

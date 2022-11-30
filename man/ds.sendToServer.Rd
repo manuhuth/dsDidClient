@@ -17,9 +17,6 @@ ds.sendToServer(x, newobj = NULL, datasources = NULL)
 
 \item{form}{formula used for glm}
 }
-\value{
-
-}
 \description{
 generate prop scores server side
 }
