@@ -1,12 +1,12 @@
-#' generate prop scores server side
-#'
-#' @param object table name
-#' @param name saved new table name
-#' @param pos distance measure
-#' @param form formula used for glm
-#' @param datasources connection
-#'
-#' @return
+#' @title genProp
+#' @description The function generates propensity scores for a given formula, coefficients, and ds.glm object on the server side.
+#' @param form A string describing the formula for generating the propensity scores
+#' @param coefficients A vector of coefficients for the formula
+#' @param object The ds.glm object to be used for generating the scores
+#' @param constant_in_matrix A logical indicating whether to include a constant in the matrix
+#' @param newobj The name of the object to which the result should be assigned on the server side.
+#' @param datasources A specific Datashield data source to which the result should be assigned.
+#' @param invlog A logical indicating whether to use the inverse logit transformation.
 #' @export
 ds.genProp <- function(form,
                        coefficients,
@@ -24,8 +24,6 @@ ds.genProp <- function(form,
 
   # first call
   cally <- call("genPropDS", form, coefficients, object, invlog, constant_in_matrix )
-  result <- DSI::datashield.assign.expr(datasources, newobj, cally)
-
-  return("Generate Propensity scores serverside")
+  DSI::datashield.assign.expr(datasources, newobj, cally)
 
 }

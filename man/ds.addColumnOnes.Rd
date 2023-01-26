@@ -2,21 +2,19 @@
 % Please edit documentation in R/ds.addColumnOnes.R
 \name{ds.addColumnOnes}
 \alias{ds.addColumnOnes}
-\title{generate prop scores server side}
+\title{ds.addColumnOnes}
 \usage{
 ds.addColumnOnes(x, columns, newobj = NULL, datasources = NULL)
 }
 \arguments{
-\item{datasources}{connection}
+\item{x}{A dataframe or a string representing a dataframe on the server side}
 
-\item{object}{table name}
+\item{columns}{A character string representing the column names of the dataframe}
 
-\item{name}{saved new table name}
+\item{newobj}{A character string representing the name of the new object to be created on the server side}
 
-\item{pos}{distance measure}
-
-\item{form}{formula used for glm}
+\item{datasources}{A list of data sources to assign the new object to. If not provided, all available connections will be used.}
 }
 \description{
-generate prop scores server side
+The function adds a column of ones to a dataframe on the server side and assigns it to a new object on the server side.
 }

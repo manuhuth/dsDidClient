@@ -2,21 +2,23 @@
 % Please edit documentation in R/ds.subsetDf.R
 \name{ds.subsetDf}
 \alias{ds.subsetDf}
-\title{match it function (pooled)}
+\title{Subset Dataframe}
 \usage{
 ds.subsetDf(df, name_variable, value, include_zero, newobj, datasources = NULL)
 }
 \arguments{
-\item{datasources}{connection}
+\item{df}{A string with the name of the dataframe from the server side to be subsetted.}
 
-\item{object}{table name}
+\item{name_variable}{The name of the variable to subset on.}
 
-\item{name}{saved new table name}
+\item{value}{The value to subset the variable on.}
 
-\item{pos}{distance measure}
+\item{include_zero}{Logical. Should zero values be included in the subset?}
 
-\item{form}{formula used for glm}
+\item{newobj}{The name of the new object to assign the subsetted dataframe to.}
+
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
 }
 \description{
-match it function (pooled)
+The function is used to subset a dataframe based on a specified variable and value. The subsetted dataframe is assigned to a new object on the server side.
 }

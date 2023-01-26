@@ -2,21 +2,23 @@
 % Please edit documentation in R/ds.generateNotYetTreated.R
 \name{ds.generateNotYetTreated}
 \alias{ds.generateNotYetTreated}
-\title{match it function (pooled)}
+\title{generateNotYetTreated}
 \usage{
 ds.generateNotYetTreated(df, name_variable, t, g, newobj, datasources = NULL)
 }
 \arguments{
-\item{datasources}{connection}
+\item{df}{A string name of the dataframe containing the variables to be used.}
 
-\item{object}{table name}
+\item{name_variable}{The name of the variable to be used to identify treatment status.}
 
-\item{name}{saved new table name}
+\item{t}{A time variable indicating when the treatment occurred.}
 
-\item{pos}{distance measure}
+\item{g}{A group variable indicating to which group the individual belongs.}
 
-\item{form}{formula used for glm}
+\item{newobj}{The name of the object to which the result should be assigned on the server side.}
+
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
 }
 \description{
-match it function (pooled)
+The function generates a dataframe of individuals who have not yet been treated, given a dataframe, a variable name, a time variable and a group variable on the server side.
 }

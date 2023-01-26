@@ -2,8 +2,7 @@
 % Please edit documentation in R/ds.did.R
 \name{ds.did}
 \alias{ds.did}
-\title{Compute did estimate
-client side function ...}
+\title{clusterInfluenceFunction}
 \usage{
 ds.did(
   data = NULL,
@@ -30,13 +29,15 @@ ds.did(
 )
 }
 \arguments{
-\item{df}{table name}
+\item{clustervars}{A string name of the vector of variables that make up the cluster for standard errors. Only has an influence if bstrap is true.}
 
-\item{pos}{distance measure}
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
 
-\item{form}{formula}
+\item{df}{A string name of the dataframe containing the data on the server side.}
+}
+\value{
+aaa
 }
 \description{
-Compute did estimate
-client side function ...
+The function calculates the influence of a cluster of variables on a target variable using an influence matrix on the server side.lows for the option to assign the result to a new object or a specific data source.
 }

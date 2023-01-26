@@ -2,7 +2,7 @@
 % Please edit documentation in R/ds.createEmptyIdMatrix.R
 \name{ds.createEmptyIdMatrix}
 \alias{ds.createEmptyIdMatrix}
-\title{generate prop scores server side}
+\title{createEmptyIdMatrix}
 \usage{
 ds.createEmptyIdMatrix(
   df,
@@ -13,16 +13,16 @@ ds.createEmptyIdMatrix(
 )
 }
 \arguments{
-\item{datasources}{connection}
+\item{df}{A string containing the name of the dataframe containing the unique identifier column.}
 
-\item{object}{table name}
+\item{idname}{The name of the column in the dataframe that serves as the unique identifier.}
 
-\item{name}{saved new table name}
+\item{n_columns}{The number of columns for the empty matrix.}
 
-\item{pos}{distance measure}
+\item{newobj}{The name of the object to which the result should be assigned.}
 
-\item{form}{formula used for glm}
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
 }
 \description{
-generate prop scores server side
+The function creates an empty matrix with unique identifiers from a dataframe and a specified number of columns on the server side.umns for the matrix. The function also allows for the option to assign the result to a new object or a specific data source.
 }

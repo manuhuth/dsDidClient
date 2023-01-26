@@ -2,15 +2,19 @@
 % Please edit documentation in R/ds.enoughIndividuals.R
 \name{ds.enoughIndividuals}
 \alias{ds.enoughIndividuals}
-\title{generate prop scores server side}
+\title{enoughIndividuals}
 \usage{
 ds.enoughIndividuals(df, colname, value, datasources = NULL)
 }
 \arguments{
-\item{datasources}{connection}
+\item{df}{A string name of the dataframe dataframe containing the column and the value to be checked.}
 
-\item{minimal_number}{}
+\item{colname}{The name of the column that should be checked.}
+
+\item{value}{The value that should be checked in the specified column.}
+
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
 }
 \description{
-generate prop scores server side
+The function checks whether there are enough individuals in a dataframe with a specified value in a specified column that is stored on the server side.
 }

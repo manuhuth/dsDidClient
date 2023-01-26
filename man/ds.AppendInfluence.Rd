@@ -2,7 +2,7 @@
 % Please edit documentation in R/ds.appendInfluence.R
 \name{ds.AppendInfluence}
 \alias{ds.AppendInfluence}
-\title{generate prop scores server side}
+\title{Append Influence to a Dataframe on the server side}
 \usage{
 ds.AppendInfluence(
   seed,
@@ -15,16 +15,20 @@ ds.AppendInfluence(
 )
 }
 \arguments{
-\item{datasources}{connection}
+\item{seed:}{Seed used for random sampling}
 
-\item{object}{table name}
+\item{df:}{The dataframe to append influence to represented as a string}
 
-\item{name}{saved new table name}
+\item{influences:}{Vector of influences to append represented as a string}
 
-\item{pos}{distance measure}
+\item{id_period_vector:}{Vector of ids and periods to append influence to represented as a string}
 
-\item{form}{formula used for glm}
+\item{column:}{The column in the dataframe to append the influence to represented as a string}
+
+\item{newobj:}{The name of the new object}
+
+\item{datasources:}{The Datashield connections to use}
 }
 \description{
-generate prop scores server side
+Appends influence to a specified column for a given set of ids and periods in a dataframe on the server side
 }

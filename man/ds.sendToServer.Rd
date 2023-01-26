@@ -2,21 +2,17 @@
 % Please edit documentation in R/ds.sendToServer.R
 \name{ds.sendToServer}
 \alias{ds.sendToServer}
-\title{generate prop scores server side}
+\title{Send Object to Server}
 \usage{
 ds.sendToServer(x, newobj = NULL, datasources = NULL)
 }
 \arguments{
-\item{datasources}{connection}
+\item{x}{The number to be sent to the server.}
 
-\item{object}{table name}
+\item{newobj}{The name of the new object to assign the sent object to on the server.}
 
-\item{name}{saved new table name}
-
-\item{pos}{distance measure}
-
-\item{form}{formula used for glm}
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
 }
 \description{
-generate prop scores server side
+The function is used to send an a single number to the server side.
 }

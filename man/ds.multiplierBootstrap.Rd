@@ -2,21 +2,17 @@
 % Please edit documentation in R/ds.multiplierBootstrap.R
 \name{ds.multiplierBootstrap}
 \alias{ds.multiplierBootstrap}
-\title{generate prop scores server side}
+\title{multiplierBootstrap}
 \usage{
 ds.multiplierBootstrap(matrix, n_iterations, datasources = NULL)
 }
 \arguments{
-\item{datasources}{connection}
+\item{matrix}{A string with the name of the matrix on which to perform the multiplier bootstrap.}
 
-\item{object}{table name}
+\item{n_iterations}{The number of iterations for the bootstrap.}
 
-\item{name}{saved new table name}
-
-\item{pos}{distance measure}
-
-\item{form}{formula used for glm}
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
 }
 \description{
-generate prop scores server side
+The function performs a multiplier bootstrap on a given matrix on the server side and returns the results to the client side.
 }

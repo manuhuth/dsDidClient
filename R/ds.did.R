@@ -1,11 +1,27 @@
-#' Compute did estimate
-#' client side function ...
-#'
-#' @param df table name
-#' @param pos distance measure
-#' @param form formula
-#'
-#' @return
+#' @title clusterInfluenceFunction
+#' @description The function calculates the influence of a cluster of variables on a target variable using an influence matrix on the server side.lows for the option to assign the result to a new object or a specific data source.
+#' @param df A string name of the dataframe containing the data on the server side.
+#' @param yname
+#' @param tname
+#' @param idname
+#' @param gname
+#' @param t_periods
+#' @param g_periods
+#' @param xformla
+#' @param control_group
+#' @param base_period
+#' @param anticipation
+#' @param alpha
+#' @param bstrap
+#' @param biters
+#' @param cband
+#' @param clustervars A string name of the vector of variables that make up the cluster for standard errors. Only has an influence if bstrap is true.
+#' @param est_method
+#' @param maxit
+#' @param seed_append
+#' @param datasources A specific Datashield data source to which the result should be assigned.
+#' @param clear_console
+#' @return aaa
 #' @export
 
 ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname = NULL,
@@ -17,9 +33,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
                    bstrap = FALSE, biters = 1000, cband = TRUE, clustervars = NULL,
                    est_method = "dr", maxit = 10000, seed_append=12345,
                    datasources = NULL, clear_console = FALSE) {
-  # TODO
 
-  # write proper docstrings
 
   #-------------------------------Checks of inputs------------------------------
   #------------------------------Check that inputs are given (NULL check)-------
@@ -51,16 +65,11 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
   #---------------Sort data-----------------------------------------------------
   # sort data frame by first id and second time
-  vec_sort <- paste0("c(", data, "$", idname, ",", data, "$", tname, ")")
+
+  vec_sort <- paste0("c('", data, "$", tname, "','", data, "$", idname, "')")
 
   ds.dataFrameSort(
-    df.name = data, sort.key.name = vec_sort, newobj = "sorted_data_missing",
-    datasources = datasources
-  )
-
-  #---------------remove missing values-----------------------------------------
-  ds.completeCases(
-    x1 = "sorted_data_missing", newobj = "sorted_data",
+    df.name = data, sort.key.name = eval(parse(text=vec_sort)), newobj = "sorted_data_missing",
     datasources = datasources
   )
 
@@ -81,6 +90,28 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
   formula_logistic_model <- as.formula(paste("G_dummy", "~ constant +", xformla_paste, "-1"))
 
 
+  #---------------remove missing values-----------------------------------------
+  #ds.completeCases(
+  #  x1 = "sorted_data_missing", newobj = "sorted_data",
+  #  datasources = datasources
+  #)
+  covariates_without_constant <- labels(terms(formula_linear_model))[labels(terms(formula_linear_model))!="constant"]
+  for (i in 1:length(datasources)){
+    ds.dataFrameSubset(
+      df.name = "sorted_data_missing",
+      V1.name =  paste0("sorted_data_missing$", gname),
+      V2.name =  paste0("sorted_data_missing$", gname),
+      Boolean.operator = "==",
+      newobj = "sorted_data",
+      keep.NAs = FALSE,
+      keep.cols = match(na.omit(c(yname, idname, tname, gname, covariates_without_constant)) , ds.colnames("sorted_data_missing", datasources[i])[[1]]) ,
+      datasources = datasources[i]
+    )
+  }
+
+
+
+
   #------------remove first period as treatment period if varying base period---
   if (base_period == "varying") {
     t_periods <- t_periods[t_periods != 1]
@@ -89,6 +120,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
   #---------------Start did algorithm-------------------------------------------
   index_iteration <- 0
+  inf <-c()
   out <- c() # creates vector that is used for output all ATTs, SEs and CIs
   for (g in g_periods) {
     for (t in t_periods) {
@@ -114,17 +146,6 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       g_string <- paste(g)
       t_string <- paste(t)
 
-      # V1_name_g <- paste(data,"$", gname, sep="")
-      # V2_name_t <- paste(data,"$", tname, sep="")
-      # keep only the individuals that are treated in g = 11 or never treated (must currently be g=0)
-      # ds.dataFrameSubset(df.name = data, V1.name = V1_name_g, V2.name = g_string,
-      #                   Boolean.operator = "==", newobj = "df_g",
-      #                   datasources= connections)
-
-      # ds.dataFrameSubset(df.name = "df_g", V1.name = V1_name_t, V2.name = t_string,
-      #                   Boolean.operator = "==", newobj = "df_g",
-      #                   datasources= connections)
-
       if ((control_group == "nevertreated")) {
         ds.subsetDf("sorted_data", gname, g,
           include_zero = TRUE, newobj = "df_g",
@@ -137,22 +158,19 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
         ) # not yet treatd values for g are already set to zero
       }
 
-      ds.subsetDf("df_g", tname, t, # create observations only from the current period t
-        include_zero = FALSE, newobj = "df_g_t_current",
-        datasources = datasources
-      ) # dummy function because df subsetting does not work with DSLite; MUST be replaced
-
+      #-----------------
+      #TODO the check must be above the subsetting
       # get datasources that have enough information - if number is too low, code will fail
-      valid_treated <- ds.enoughIndividuals("df_g_t_current",
-        colname = "treat",
-        value = "1",
-        datasources = datasources
+      valid_treated <- ds.enoughIndividuals("df_g",
+                                            colname = tname,
+                                            value = g_string,
+                                            datasources = datasources
       )
 
-      valid_untreated <- ds.enoughIndividuals("df_g_t_current",
-        colname = "treat",
-        value = "0",
-        datasources = datasources
+      valid_untreated <- ds.enoughIndividuals("df_g",
+                                              colname = tname,
+                                              value = control_period,
+                                              datasources = datasources
       )
 
       valid_datasources_g_t <- as.vector(do.call(rbind, valid_treated)) * as.vector(do.call(rbind, valid_untreated)) * (1:length(valid_treated))
@@ -163,7 +181,16 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
         next
       }
 
-      datasources_subsetted <<- datasources[valid_datasources_g_t[valid_datasources_g_t != 0]]
+      datasources_subsetted <- datasources[valid_datasources_g_t[valid_datasources_g_t != 0]]
+      #----------------
+
+
+      ds.subsetDf("df_g", tname, t, # create observations only from the current period t
+        include_zero = FALSE, newobj = "df_g_t_current",
+        datasources = datasources_subsetted
+      ) # dummy function because df subsetting does not work with DSLite; MUST be replaced
+
+
 
       # create vector with ids that are used within this iteration
       cols_current <- ds.colnames("df_g_t_current", datasources = datasources_subsetted)[[1]] # get all columns
@@ -204,7 +231,6 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
       # create vector of outcome differences
       ds.make("y_t - y_lag", "delta_y", datasources = datasources_subsetted)
-
 
 
       # create data frame with covariates, X variables, and G
@@ -250,8 +276,6 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
           cat("\014")
         }
 
-        # TODO or write disclosiveness checks
-        # change by cbind? and as.matrix?
         ds.addColumnOnes("covariates",
           columns = columns_x,
           newobj = "covariates_one", datasources = datasources_subsetted
@@ -263,8 +287,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
         )
       } else { # case without covariates
         columns_df_delta <- ds.colnames("df_delta_y_g", datasources = datasources_subsetted)[[1]]
-        # TODO or write disclosiveness checks
-        # change by cbind? and as.matrix?
+
         ds.addColumnOnes("df_delta_y_g",
           columns = columns_df_delta,
           newobj = "df_analysis", datasources = datasources_subsetted
@@ -281,10 +304,6 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       )
 
       if (!is.null(xformla)) { # compute expectation
-        # TODO
-        # include checks for overparameterization similar to DID package
-
-
         # run linear regression -> E(delta_y|X, G = 0)
         linear_regression_object <- ds.glm(formula_linear_model,
           data = "df_analysis_non_treated",
@@ -344,11 +363,11 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
 
 
-        ds.genProp(logit_regression_object$formula, logit_regression_object$coefficients[, c(1)],
+        ds.genProp(formula_logistic_model, logit_regression_object$coefficients[, c(1)],
           "df_analysis_logit", "propensity_scores",
           datasources = datasources_subsetted, invlog = TRUE, constant_in_matrix = TRUE
         )
-      } else {
+      } else {#no covariates
         mean_logit <- ds.mean("df_analysis_logit$G_dummy",
           type = "combined",
           datasources = datasources_subsetted
@@ -377,7 +396,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       mean_G <- ds.mean("G_dummy", type = "combined", datasources = datasources_subsetted)$Global.Mean[1]
       mean_odds <- ds.mean("odds", type = "combined", datasources = datasources_subsetted)$Global.Mean[1] # odds if in control group; else zero
       ds.make("1 - df_analysis_logit$G_dummy", "weights_ols", datasources = datasources_subsetted)
-      ds.make("weights_ols * propensity_scores", "pscore_tr", datasources = datasources_subsetted)
+      ds.make("weights_ols * as.vector(propensity_scores)", "pscore_tr", datasources = datasources_subsetted)
 
       #-------------Differentiate with respect to estimators--------------------
       if (est_method == "reg") {
@@ -416,18 +435,6 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       }
 
       #-------------------------------------------------------------------------
-
-      # weights.ols = weights_ols
-      # int.cov = covariates_one
-      # deltaY = delta_y
-      # out.delta = delta_y_fitted
-      # ps.fit = propensity_scores
-      # D <- df_analysis_logit$G_dummy
-      # pscore.tr = pscore_tr
-      # w.treat = df_analysis_logit$G_dummy
-      # w.cont = odds
-      # dr.att = dr_att
-
       n <- ds.dim("df_analysis", datasources = datasources_subsetted)$`dimensions of df_analysis in combined studies`[1]
 
 
@@ -445,6 +452,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       eta_treat <- mean_att_treat / mean_G
       eta_cont <- mean_att_cont / mean_odds
       dr_att <- eta_treat - eta_cont # compute estimate
+      #-------------------------------------------------------------------------
 
 
       # compute standard errors --------------------------------------------------
@@ -527,7 +535,8 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       # Leading term of the influence function: no estimation effect
 
       # only numbers are possible
-      ds.sendToServer(eta_treat, newobj = "eta_treat_server", datasources = datasources_subsetted)
+      ds.sendToServer(eta_treat, newobj = "eta_treat_server",
+                      datasources = datasources_subsetted)
       ds.make("(att_treat - df_analysis_logit$G_dummy * eta_treat_server)",
         newobj = "inf_treat_1",
         datasources = datasources_subsetted
@@ -551,7 +560,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       if (!is.null(xformla)) {
         cols_covariates <- ds.colnames("M1_helper", datasources = datasources_subsetted)[[1]]
         for (i in 1:length(cols_covariates)) {
-          variable <- paste0("M1_helper$`", cols_covariates[i], "`")
+          variable <- paste0("M1_helper$", cols_covariates[i])
           means_M1[i] <- ds.mean(variable,
             type = "combined",
             datasources = datasources_subsetted
@@ -573,10 +582,19 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
       # TODO
       # check function. ds.make?
-      inf_treat <- ds.computeInfTreatDifference("inf_treat_1", "inf_treat_2",
-        datasources = datasources_subsetted
-      ) # divide by mean of G later
 
+      ds.sendToServer(mean_G, newobj = "mean_G",
+                      datasources = datasources_subsetted)
+      ds.make("inf_treat_1 / mean_G", newobj = "inf_treat_1_G",
+              datasources = datasources_subsetted)
+      ds.make("inf_treat_2 / mean_G", newobj = "inf_treat_2_G",
+              datasources = datasources_subsetted)
+
+      #inf_treat_object <- ds.computeInfTreatDifference("inf_treat_1", "inf_treat_2",
+      #  datasources = datasources_subsetted
+      #) # divide by mean of G later
+      #inf_treat <- lapply(inf_treat_object, function(l) l[[1]])
+      #noise_sd_treat <- lapply(inf_treat_object, function(l) l[[2]])
       #-----------------------------------------------------------------------------
       # Now, get the influence function of control component
       # Leading term of the influence function: no estimation effect
@@ -616,7 +634,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       if (!is.null(xformla)) {
         cols_covariates <- ds.colnames("M2_helper", datasources = datasources_subsetted)[[1]]
         for (i in 1:length(cols_covariates)) {
-          variable <- paste0("M2_helper$`", cols_covariates[i], "`")
+          variable <- paste0("M2_helper$", cols_covariates[i])
           means_M2[i] <- ds.mean(variable,
             type = "combined",
             datasources = datasources_subsetted
@@ -628,11 +646,6 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
           datasources = datasources_subsetted
         )$Global.Mean[1]
       }
-
-
-
-      # TODO
-      # this will definitely not work, I think.
 
 
       if (clear_console) {
@@ -663,7 +676,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       if (!is.null(xformla)) {
         cols_covariates <- ds.colnames("M3_helper", datasources = datasources_subsetted)[[1]]
         for (i in 1:length(cols_covariates)) {
-          variable <- paste0("M3_helper$`", cols_covariates[i], "`")
+          variable <- paste0("M3_helper$", cols_covariates[i])
           means_M3[i] <- ds.mean(variable,
             type = "combined",
             datasources = datasources_subsetted
@@ -690,12 +703,30 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
       # TODO
       # ds.make?
-      inf_control_difference <- ds.computeInfTreatDifference("inf_cont_helper", "inf_cont_3",
-        datasources = datasources_subsetted
-      )
-      odds_mean <- ds.mean("odds", type = "combined", datasources = datasources_subsetted)$Global.Mean[1]
 
-      inf_control <- unlist(inf_control_difference) / odds_mean
+      #inf_control_difference_object <- ds.computeInfTreatDifference("inf_cont_helper", "inf_cont_3",
+      #  datasources = datasources_subsetted
+      #)
+      #inf_control_difference <- lapply(inf_control_difference_object, function(l) l[[1]])
+      #noise_sd_control_difference <- lapply(inf_control_difference_object, function(l) l[[2]])
+      #sample_sizes <-  lapply(inf_control_difference_object, function(l) l[[3]])
+
+
+
+      odds_mean <- ds.mean("odds", type = "combined",
+                           datasources = datasources_subsetted)$Global.Mean[1]
+
+      ds.sendToServer(odds_mean, newobj = "odds_mean",
+                      datasources = datasources_subsetted)
+      ds.make("inf_cont_helper / odds_mean", newobj = "inf_cont_helper_p",
+              datasources = datasources_subsetted)
+
+      ds.make("inf_cont_3 / odds_mean", newobj = "inf_cont_3_p",
+              datasources = datasources_subsetted)
+
+
+
+      #inf_control <- unlist(inf_control_difference) / odds_mean
 
       if (clear_console) {
         cat("\014")
@@ -703,15 +734,21 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
       # get the influence function of the DR estimator (put all pieces together)
       if (est_method == "dr") {
-        dr_att_inf_func <- unlist(inf_treat) / mean_G - inf_control # divide by mean of G here because we cannot do it when inf_treat is created
-      } else if (est_method %in% c("ipw", "reg")) {
-        ds.make(paste0("inf_treat_1 / ", mean_G), newobj = "inf_treat", datasources = datasources_subsetted)
-        ds.make(paste0("inf_cont_helper / ", odds_mean), newobj = "inf_control", datasources = datasources_subsetted)
+
+        #dr_att_inf_func <<-  unlist(inf_treat) / mean_G - inf_control # divide by mean of G here because we cannot do it when inf_treat is created
+
+        ds.make("inf_treat_1_G - inf_treat_2_G - inf_cont_helper_p + inf_cont_3_p",
+                newobj="dr_att_inf_func", datasources = datasources_subsetted)
+
+        } else if (est_method %in% c("ipw", "reg")) {
+        ds.make(paste0("inf_treat_1 / ", mean_G),
+                newobj = "inf_treat", datasources = datasources_subsetted)
+        ds.make(paste0("inf_cont_helper / ", odds_mean),
+                newobj = "inf_control", datasources = datasources_subsetted)
 
 
-        dr_att_inf_func <- unlist(ds.computeInfTreatDifference("inf_treat", "inf_control",
-          datasources = datasources_subsetted
-        ))
+        ds.make("inf_treat_1_G - inf_cont_helper_p ",
+                newobj="dr_att_inf_func", datasources = datasources_subsetted)
       }
       #-----------------------------------------------------------------------------
       # create empty matrix with all ids for influence
@@ -721,27 +758,61 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
         ds.createEmptyIdMatrix("sorted_data", idname, paste(n_columns),
           newobj = "influence_matrix", datasources = datasources_subsetted
         )
-      }
 
-      # send dr_att_inf_func and ids to servers loop over connections and ids_length and append to matrix
-      last_index <- 0 # initialize index of individuals in dr_att_inf_func (they are ordered)
+        ds.createEmptyIdMatrix("sorted_data", idname, paste(n_columns),
+                               newobj = "influence_matrix_not_divided",
+                               datasources = datasources_subsetted
+        )
 
-      for (i in 1:length(datasources_subsetted)) {
-        first_index <- last_index + 1 # choose next index
-        last_index <- last_index + length_ids[[i]]
-        influence_source <- dr_att_inf_func[(first_index:last_index)] / n # divide by (which is n1) in the paper
-
-        # TODO recheck function
-        ds.AppendInfluence(seed_append, "influence_matrix", influence_source, "ids_g_t",
-          index_iteration,
-          newobj = "influence_matrix",
-          datasources = datasources_subsetted[[i]]
+        ds.createEmptyIdMatrix("sorted_data", idname, paste(n_columns),
+                               newobj = "test_matrix", datasources = datasources_subsetted
         )
       }
 
-      # Estimate of asymptotic standard error
-      se_dr_att <- (t(dr_att_inf_func) %*% dr_att_inf_func / n)^0.5 / sqrt(n) #-> divide by 40 (total numbers of individuals)
+      # send dr_att_inf_func and ids to servers loop over connections and ids_length and append to matrix
+      #last_index <- 0 # initialize index of individuals in dr_att_inf_func (they are ordered)
 
+      #for (i in 1:length(datasources_subsetted)) {
+       # first_index <- last_index + 1 # choose next index
+      #  last_index <- last_index + length_ids[[i]]
+      #  influence_source <- dr_att_inf_func[(first_index:last_index)] / n # divide by n (which is n1) in the paper
+
+        # TODO recheck function
+      ds.sendToServer(n, newobj = "n", datasources = datasources_subsetted)
+      ds.make("dr_att_inf_func / n", newobj="dr_att_inf_func_n")
+
+      ds.AppendInfluence(seed_append, "influence_matrix", "dr_att_inf_func_n",
+                         "ids_g_t",
+          index_iteration,
+          newobj = "influence_matrix",
+          datasources = datasources_subsetted#[[i]]
+      )
+
+      ds.AppendInfluence(seed_append, "influence_matrix_not_divided",
+                         "dr_att_inf_func", "ids_g_t",
+                         index_iteration,
+                         newobj = "influence_matrix_not_divided",
+                         datasources = datasources_subsetted#[[i]]
+      )
+      #}
+
+
+      # Estimate of asymptotic standard error
+      #correction <- 0
+      #if (correct_asymp_std_errors) {
+      #  correction <- sum( (unlist(noise_sd_control_difference)^2 / mean_G^2 + unlist(noise_sd_treat)^2 / mean_odds^2) * unlist(sample_sizes) ) / n^2
+      #}
+      d <<- n
+      ds.make("dr_att_inf_func * dr_att_inf_func", newobj="psi_inner_product",
+              datasources = datasources_subsetted)
+
+      #mean(t(psi) * psi) = psi^T * psi / n -> need to divide gloabl mean by sqrt n
+      se_dr_att <- (ds.mean("psi_inner_product", type = "combined",
+                                        datasources=datasources_subsetted)$Global.Mean[1])^0.5 / sqrt(n)
+
+      #se_dr_att <- (((t(dr_att_inf_func) %*% dr_att_inf_func / n)^0.5 / sqrt(n))^2 - correction)^0.5
+      dr_att_inf_func <- unlist(ds.buildHelper("dr_att_inf_func", datasources = datasources_subsetted))
+      inf <- cbind(inf, dr_att_inf_func)
       z_value <- qnorm(1 - alpha / 2)
 
       length_ci <- z_value * se_dr_att
@@ -761,16 +832,51 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
     } # end t
   } # end g
 
+  se <- out[, "SE"]
+
   dimensions_influence <- ds.dim("influence_matrix", datasources = datasources_subsetted)
   n_global <- dimensions_influence[[length(dimensions_influence)]][1]
   n_std_error <- n_global # is overwritten if clustered standard errors; otherwise we cluster at the individual level
 
-  ds.make(paste0("influence_matrix *", n_global),
+  ds.sendToServer(n_global, newobj = "n_global",
+                  datasources = datasources_subsetted)
+
+  ds.make(paste0("influence_matrix * n_global"),
     newobj = "influence_matrix_adjusted",
     datasources = datasources_subsetted
   ) # adjust by multiplying with total amount (done in original package with n)
 
   name_influence_use <- "influence_matrix_adjusted"
+
+  #needed for output and bootstrap
+  dp <- DIDparams(yname=yname,
+                  tname=tname,
+                  idname=idname,
+                  gname=gname,
+                  xformla=xformla,
+                  data=NULL,
+                  control_group=control_group,
+                  anticipation=anticipation,
+                  weightsname=NULL,
+                  alp=alpha,
+                  bstrap=bstrap,
+                  biters=biters,
+                  clustervars=clustervars,
+                  cband=cband,
+                  print_details=FALSE,
+                  pl=FALSE,
+                  cores=1,
+                  est_method=est_method,
+                  base_period=base_period,
+                  panel=TRUE,
+                  true_repeated_cross_sections=FALSE,
+                  n=n_global,
+                  nG=length(g_periods),
+                  nT=length(t_periods),
+                  tlist=t_periods,
+                  glist=g_periods,
+                  call=match.call())
+
 
   # bootstrap
   if (bstrap) {
@@ -794,13 +900,13 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       #-----------------------------------------------------------------------
     }
 
+    #cannot use original mboot functionsince this function requires the data to be in dp
     bootstrap_samples <- ds.multiplierBootstrap(name_influence_use, biters,
       datasources = datasources_subsetted
     ) # everything still needs to be divided by number of cluster
 
 
     bootstrap_sample_combined <- Reduce("+", bootstrap_samples) / n_std_error
-
     bres <- sqrt(n_std_error) * bootstrap_sample_combined
 
 
@@ -839,12 +945,16 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
   #-------------------Wald-Test for parallel trend assumption-------------------
   # TODO check function; as above
+  #TODO reduce using + and divide by n_global
 
-  V <- Reduce("+", ds.computeMatrixCrossproduct("influence_matrix_adjusted", datasources = datasources_subsetted)) / n_global
-  V1 <- V
-  pre <- out[, "Group"] > out[, "Time"]
-  pre_att <- as.matrix(out[pre, "ATT"])
-  pre_V <- as.matrix(V[pre, pre])
+  V <<- Reduce("+", ds.computeMatrixCrossproduct("influence_matrix_not_divided",
+                                    datasources = datasources_subsetted)) / n_global
+
+  #V3 <<- t(inf) %*% inf / n_global
+
+  pre <-out[, "Group"] > out[, "Time"]
+  pre_att <-as.matrix(out[pre, "ATT"])
+  pre_V <-as.matrix(V[pre, pre])
 
   #-----------start from original package --------------------------------------
   # check if there are actually any pre-treatment periods
@@ -863,12 +973,22 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
     W_pval <- NULL
   } else {
     # everything is working...
-    W <- n_global * t(pre_att) %*% solve(pre_V) %*% pre_att
-    q <- length(pre) # number of restrictions
+    W <-n_global * t(pre_att) %*% solve(pre_V) %*% pre_att
+    q <- length(c(pre_att)) # number of restrictions
     W_pval <- round(1 - pchisq(W, q), 5)
   }
   #---------End from original package-------------------------------------------
 
 
-  return(out)
+  #return(out)
+  #change output such that it matches original did package
+  tt <- rep(t_periods, length(g_periods))
+  group <- rep(g_periods,each=length(t_periods))
+  att <- out[, "ATT"]
+
+
+
+
+  return(MP(group=group, t=tt, att=att, V_analytical=V, se=se, c=z_value,
+            inffunc=inf, n=n_global, W=W, Wpval=W_pval, alp = alpha, DIDparams=dp))
 }

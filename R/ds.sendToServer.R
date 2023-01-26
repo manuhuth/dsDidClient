@@ -1,12 +1,9 @@
-#' generate prop scores server side
-#'
-#' @param object table name
-#' @param name saved new table name
-#' @param pos distance measure
-#' @param form formula used for glm
-#' @param datasources connection
-#'
-#' @return
+#' @title Send Object to Server
+#' @description The function is used to send an a single number to the server side.
+#' @param x The number to be sent to the server.
+#' @param newobj The name of the new object to assign the sent object to on the server.
+#' @param datasources A specific Datashield data source to which the result should be assigned.
+
 #' @export
 ds.sendToServer <- function(x,
                                     newobj = NULL,

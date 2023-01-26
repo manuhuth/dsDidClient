@@ -2,21 +2,15 @@
 % Please edit documentation in R/ds.computeMatrixCrossproduct.R
 \name{ds.computeMatrixCrossproduct}
 \alias{ds.computeMatrixCrossproduct}
-\title{generate prop scores server side}
+\title{computeMatrixCrossproduct}
 \usage{
 ds.computeMatrixCrossproduct(x, datasources = NULL)
 }
 \arguments{
-\item{datasources}{connection}
+\item{x}{A string of the matrix for which the cross product is to be computed.}
 
-\item{object}{table name}
-
-\item{name}{saved new table name}
-
-\item{pos}{distance measure}
-
-\item{form}{formula used for glm}
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
 }
 \description{
-generate prop scores server side
+The function computes the cross product (matrix transpose times matrix) of a matrix x which is stored on the server side and returns it to the client side.
 }

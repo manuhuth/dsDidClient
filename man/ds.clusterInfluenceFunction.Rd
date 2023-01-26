@@ -2,7 +2,7 @@
 % Please edit documentation in R/ds.clusterInfluenceFunction.R
 \name{ds.clusterInfluenceFunction}
 \alias{ds.clusterInfluenceFunction}
-\title{generate prop scores server side}
+\title{clusterInfluenceFunction}
 \usage{
 ds.clusterInfluenceFunction(
   df,
@@ -14,16 +14,18 @@ ds.clusterInfluenceFunction(
 )
 }
 \arguments{
-\item{datasources}{connection}
+\item{df}{A string name of the dataframe containing the target variable and the clustervars.}
 
-\item{object}{table name}
+\item{influence_matrix}{A string name of the matrix containing the influence of each variable on the target variable.}
 
-\item{name}{saved new table name}
+\item{clustervars}{A string name of the vector of variables that make up the cluster.}
 
-\item{pos}{distance measure}
+\item{idname}{The name of the column in the dataframe that serves as the unique identifier.}
 
-\item{form}{formula used for glm}
+\item{newobj}{The name of the object to which the result should be assigned.}
+
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
 }
 \description{
-generate prop scores server side
+The function calculates the influence of a cluster of variables on a target variable using an influence matrix on the server side.lows for the option to assign the result to a new object or a specific data source.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ds.genProp.R
 \name{ds.genProp}
 \alias{ds.genProp}
-\title{generate prop scores server side}
+\title{genProp}
 \usage{
 ds.genProp(
   form,
@@ -15,16 +15,20 @@ ds.genProp(
 )
 }
 \arguments{
-\item{form}{formula used for glm}
+\item{form}{A string describing the formula for generating the propensity scores}
 
-\item{object}{table name}
+\item{coefficients}{A vector of coefficients for the formula}
 
-\item{datasources}{connection}
+\item{object}{The ds.glm object to be used for generating the scores}
 
-\item{name}{saved new table name}
+\item{constant_in_matrix}{A logical indicating whether to include a constant in the matrix}
 
-\item{pos}{distance measure}
+\item{newobj}{The name of the object to which the result should be assigned on the server side.}
+
+\item{datasources}{A specific Datashield data source to which the result should be assigned.}
+
+\item{invlog}{A logical indicating whether to use the inverse logit transformation.}
 }
 \description{
-generate prop scores server side
+The function generates propensity scores for a given formula, coefficients, and ds.glm object on the server side.
 }
