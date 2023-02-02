@@ -811,8 +811,8 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
                                         datasources=datasources_subsetted)$Global.Mean[1])^0.5 / sqrt(n)
 
       #se_dr_att <- (((t(dr_att_inf_func) %*% dr_att_inf_func / n)^0.5 / sqrt(n))^2 - correction)^0.5
-      dr_att_inf_func <- unlist(ds.buildHelper("dr_att_inf_func", datasources = datasources_subsetted))
-      inf <- cbind(inf, dr_att_inf_func)
+      #dr_att_inf_func <- unlist(ds.buildHelper("dr_att_inf_func", datasources = datasources_subsetted))
+      #inf <- cbind(inf, dr_att_inf_func)
       z_value <- qnorm(1 - alpha / 2)
 
       length_ci <- z_value * se_dr_att
@@ -836,7 +836,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
   dimensions_influence <- ds.dim("influence_matrix", datasources = datasources_subsetted)
   n_global <- dimensions_influence[[length(dimensions_influence)]][1]
-  n_std_error <- n_global # is overwritten if clustered standard errors; otherwise we cluster at the individual level
+  n_std_error <<- n_global # is overwritten if clustered standard errors; otherwise we cluster at the individual level
 
   ds.sendToServer(n_global, newobj = "n_global",
                   datasources = datasources_subsetted)
@@ -990,5 +990,5 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
 
   return(MP(group=group, t=tt, att=att, V_analytical=V, se=se, c=z_value,
-            inffunc=inf, n=n_global, W=W, Wpval=W_pval, alp = alpha, DIDparams=dp))
+            inffunc=NULL, n=n_global, W=W, Wpval=W_pval, alp = alpha, DIDparams=dp))
 }
