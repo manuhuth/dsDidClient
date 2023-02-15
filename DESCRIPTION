@@ -17,9 +17,11 @@ Suggests:
     covr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Remotes: git::https://github.com/datashield/dsBaseClient.git
 Imports: 
     did,
+    dsBaseClient,
     DSI,
     stats,
     methods
+Remotes: 
+    datashield/dsBaseClient
