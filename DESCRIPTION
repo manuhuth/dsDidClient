@@ -13,3 +13,5 @@ RoxygenNote: 7.2.3
 Options: datashield.privacyLevel=5
 URL: https://github.com/manuhuth/dsDidClient
 BugReports: https://github.com/manuhuth/dsDidClient/issues
+Suggests: 
+    covr
