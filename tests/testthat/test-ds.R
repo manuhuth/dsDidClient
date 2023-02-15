@@ -1,5 +1,4 @@
 test_that("ds_did_works", {
-  install.packages("DSLite")
   library(DSLite)
   library(did)
   library(dsDid)

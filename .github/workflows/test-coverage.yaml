@@ -29,6 +29,10 @@ jobs:
       - name: Test coverage
         run: |
           install.packages('dsBaseClient', repos=c(getOption('repos'), 'http://cran.datashield.org'), dependencies=TRUE)
+          install.packages('dsBase', repos=c(getOption('repos'), 'http://cran.datashield.org'), dependencies=TRUE)
+          install.packages("DSLite")
+          install.packages("devtools")
+          devtools::install_github("manuhuth/dsDid", dependencies=TRUE)
           covr::codecov(
             quiet = FALSE,
             clean = FALSE,
