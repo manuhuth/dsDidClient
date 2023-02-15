@@ -13,7 +13,7 @@ ds.computeOdds(name_propensities, name_C, newobj = NULL, datasources = NULL)
 
 \item{newobj}{An optional character string indicating the name of the object to store the computed odds in. Default is NULL.}
 
-\item{datasources}{An optional list of DataSHIELD data source connections to use. If NULL, the function will attempt to find connections using the \code{\link{datashield.connections_find}} function.}
+\item{datasources}{An optional list of DataSHIELD data source connections to use.}
 }
 \value{
 The computed odds as a DataSHIELD object.

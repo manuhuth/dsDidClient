@@ -14,19 +14,17 @@ ds.AppendInfluence(
 )
 }
 \arguments{
-\item{seed:}{Seed used for random sampling}
+\item{df}{The dataframe to append influence to represented as a string}
 
-\item{df:}{The dataframe to append influence to represented as a string}
+\item{influences}{Vector of influences to append represented as a string}
 
-\item{influences:}{Vector of influences to append represented as a string}
+\item{id_period_vector}{Vector of ids and periods to append influence to represented as a string}
 
-\item{id_period_vector:}{Vector of ids and periods to append influence to represented as a string}
+\item{column}{The column in the dataframe to append the influence to represented as a string}
 
-\item{column:}{The column in the dataframe to append the influence to represented as a string}
+\item{newobj}{The name of the new object}
 
-\item{newobj:}{The name of the new object}
-
-\item{datasources:}{The Datashield connections to use}
+\item{datasources}{The Datashield connections to use}
 }
 \description{
 Appends influence to a specified column for a given set of ids and periods in a dataframe on the server side
