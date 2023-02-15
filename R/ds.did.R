@@ -82,12 +82,12 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
   # y_delta is the name we give to the difference of Y observations in t and g - anticipation - 1
   # The name is assigned within the loop below at each period respectively
-  formula_linear_model <- as.formula(paste("delta_y", "~ constant +", xformla_paste, "-1"))
+  formula_linear_model <- stats::as.formula(paste("delta_y", "~ constant +", xformla_paste, "-1"))
 
   # G_t is the name of the dummy variable that indicates if an individuals receives
   # treatment in period g. The name is assigned within the loop below at each
   # period respectively
-  formula_logistic_model <- as.formula(paste("G_dummy", "~ constant +", xformla_paste, "-1"))
+  formula_logistic_model <- stats::as.formula(paste("G_dummy", "~ constant +", xformla_paste, "-1"))
 
 
   #---------------remove missing values-----------------------------------------
@@ -95,7 +95,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
   #  x1 = "sorted_data_missing", newobj = "sorted_data",
   #  datasources = datasources
   #)
-  covariates_without_constant <- labels(terms(formula_linear_model))[labels(terms(formula_linear_model))!="constant"]
+  covariates_without_constant <- labels(stats::terms(formula_linear_model))[labels(stats::terms(formula_linear_model))!="constant"]
   for (i in 1:length(datasources)){
     ds.dataFrameSubset(
       df.name = "sorted_data_missing",
@@ -104,7 +104,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       Boolean.operator = "==",
       newobj = "sorted_data",
       keep.NAs = FALSE,
-      keep.cols = match(na.omit(c(yname, idname, tname, gname, covariates_without_constant)) , ds.colnames("sorted_data_missing", datasources[i])[[1]]) ,
+      keep.cols = match(stats::na.omit(c(yname, idname, tname, gname, covariates_without_constant)) , ds.colnames("sorted_data_missing", datasources[i])[[1]]) ,
       datasources = datasources[i]
     )
   }
@@ -244,7 +244,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       # save X vector from lag period as matrix of controls; generate object since this subsequently used to compute
       if (!is.null(xformla)) {
         # Get the names of the x-variables in vector
-        columns_x <- labels(terms(as.formula(paste("delta_y ~", xformla))))
+        columns_x <- labels(stats::terms(stats::as.formula(paste("delta_y ~", xformla))))
 
         cols <- ds.colnames("df_g_t_lag", datasources = datasources_subsetted)[[1]]
         indices <- match(columns_x, cols)
@@ -813,7 +813,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       #se_dr_att <- (((t(dr_att_inf_func) %*% dr_att_inf_func / n)^0.5 / sqrt(n))^2 - correction)^0.5
       #dr_att_inf_func <- unlist(ds.buildHelper("dr_att_inf_func", datasources = datasources_subsetted))
       #inf <- cbind(inf, dr_att_inf_func)
-      z_value <- qnorm(1 - alpha / 2)
+      z_value <- stats::qnorm(1 - alpha / 2)
 
       length_ci <- z_value * se_dr_att
       upper_bound <- dr_att + length_ci
@@ -917,8 +917,8 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
     b_sigma <- apply(
       bres, 2,
       function(b) {
-        (quantile(b, .75, type = 1, na.rm = T) -
-          quantile(b, .25, type = 1, na.rm = T)) / (qnorm(.75) - qnorm(.25))
+        (stats::quantile(b, .75, type = 1, na.rm = T) -
+          stats::quantile(b, .25, type = 1, na.rm = T)) / (stats::qnorm(.75) - stats::qnorm(.25))
       }
     )
     se <- as.numeric(b_sigma) / sqrt(n_std_error)
@@ -928,7 +928,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
     if (cband) {
       # sup-t confidence band
       bT <- apply(bres, 1, function(b) max(abs(b / b_sigma), na.rm = TRUE))
-      z_value <- quantile(bT, 1 - alpha, type = 1, na.rm = T)
+      z_value <- stats::quantile(bT, 1 - alpha, type = 1, na.rm = T)
       if (z_value >= 7) {
         warning("Simultaneous critical value is arguably `too large' to be realible. This usually happens when number of observations per group is small and/or there is no much variation in outcomes.")
       }
@@ -975,7 +975,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
     # everything is working...
     W <-n_global * t(pre_att) %*% solve(pre_V) %*% pre_att
     q <- length(c(pre_att)) # number of restrictions
-    W_pval <- round(1 - pchisq(W, q), 5)
+    W_pval <- round(1 - stats::pchisq(W, q), 5)
   }
   #---------End from original package-------------------------------------------
 
