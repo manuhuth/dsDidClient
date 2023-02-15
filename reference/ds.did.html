@@ -69,7 +69,6 @@
 <span>  clustervars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  est_method <span class="op">=</span> <span class="st">"dr"</span>,</span>
 <span>  maxit <span class="op">=</span> <span class="fl">10000</span>,</span>
-<span>  seed_append <span class="op">=</span> <span class="fl">12345</span>,</span>
 <span>  datasources <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  clear_console <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -77,24 +76,86 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>clustervars</dt>
+    <dl><dt>data</dt>
+<dd><p>A string name of the dataframe containing the data on the server side.</p></dd>
+
+
+<dt>yname</dt>
+<dd><p>Name of the outcome variable in the data frame on the server side.</p></dd>
+
+
+<dt>tname</dt>
+<dd><p>Name of the time variable in the data frame on the server side.</p></dd>
+
+
+<dt>idname</dt>
+<dd><p>Name of the id variable in the data frame on the server side.</p></dd>
+
+
+<dt>gname</dt>
+<dd><p>Name of the treatment indicator variable in the data frame on the server side.</p></dd>
+
+
+<dt>t_periods</dt>
+<dd><p>Vector of time periods.</p></dd>
+
+
+<dt>g_periods</dt>
+<dd><p>Vector of treatment periods.</p></dd>
+
+
+<dt>xformla</dt>
+<dd><p>Formula of covariates.</p></dd>
+
+
+<dt>control_group</dt>
+<dd><p>either "nevertreated" or "notyettreated"</p></dd>
+
+
+<dt>base_period</dt>
+<dd><p>either "varying" or "universal".</p></dd>
+
+
+<dt>anticipation</dt>
+<dd><p>integer of pre-treatment anticipation.</p></dd>
+
+
+<dt>alpha</dt>
+<dd><p>Confidence level of CIs.</p></dd>
+
+
+<dt>bstrap</dt>
+<dd><p>If TRUE, multiplier bootstrap is used to compute standard errors.</p></dd>
+
+
+<dt>biters</dt>
+<dd><p>Number of bootstrap draws. Only relevenat if bstrap is TRUE.</p></dd>
+
+
+<dt>cband</dt>
+<dd><p>if TRUE, simultaneous confidence bands are returned.</p></dd>
+
+
+<dt>clustervars</dt>
 <dd><p>A string name of the vector of variables that make up the cluster for standard errors. Only has an influence if bstrap is true.</p></dd>
+
+
+<dt>est_method</dt>
+<dd><p>can either be "dr", "reg" or "ipw".</p></dd>
+
+
+<dt>maxit</dt>
+<dd><p>MAximal number of iterations for ds.glm.</p></dd>
 
 
 <dt>datasources</dt>
 <dd><p>A specific Datashield data source to which the result should be assigned.</p></dd>
 
 
-<dt>df</dt>
-<dd><p>A string name of the dataframe containing the data on the server side.</p></dd>
+<dt>clear_console</dt>
+<dd><p>If TRUE, the coinsole is yleared at certain stages.</p></dd>
 
 </dl></div>
-    <div id="value">
-    <h2>Value</h2>
-    
-
-<p>aaa</p>
-    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
