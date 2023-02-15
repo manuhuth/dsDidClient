@@ -5,7 +5,6 @@
 \title{Append Influence to a Dataframe on the server side}
 \usage{
 ds.AppendInfluence(
-  seed,
   df,
   influences,
   id_period_vector,

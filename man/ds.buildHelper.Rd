@@ -7,15 +7,9 @@
 ds.buildHelper(x, datasources = NULL)
 }
 \arguments{
+\item{x}{just a helper}
+
 \item{datasources}{connection}
-
-\item{object}{table name}
-
-\item{name}{saved new table name}
-
-\item{pos}{distance measure}
-
-\item{form}{formula used for glm}
 }
 \description{
 generate prop scores server side

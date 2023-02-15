@@ -1,13 +1,11 @@
-#' generate prop scores server side
+#' @title Compute Odds Using Propensity Scores
+#' @description This function computes odds using propensity scores for a given dataset and outcome variable using DataSHIELD.
+#' @param name_propensities A character string indicating the name of the dataset containing the propensity scores.
+#' @param name_C A character string indicating the name of the dataset containing the outcome variable.
+#' @param newobj An optional character string indicating the name of the object to store the computed odds in. Default is NULL.
+#' @param datasources An optional list of DataSHIELD data source connections to use. If NULL, the function will attempt to find connections using the \code{\link{datashield.connections_find}} function.
 #'
-#' @param object table name
-#' @param name saved new table name
-#' @param pos distance measure
-#' @param form formula used for glm
-#' @param datasources connection
-#'
-#' @return
-#' @export
+#' @return The computed odds as a DataSHIELD object.
 ds.computeOdds <- function(name_propensities, name_C,
                        newobj = NULL,
                        datasources = NULL){

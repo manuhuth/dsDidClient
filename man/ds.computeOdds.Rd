@@ -2,21 +2,22 @@
 % Please edit documentation in R/ds.computeOdds.R
 \name{ds.computeOdds}
 \alias{ds.computeOdds}
-\title{generate prop scores server side}
+\title{Compute Odds Using Propensity Scores}
 \usage{
 ds.computeOdds(name_propensities, name_C, newobj = NULL, datasources = NULL)
 }
 \arguments{
-\item{datasources}{connection}
+\item{name_propensities}{A character string indicating the name of the dataset containing the propensity scores.}
 
-\item{object}{table name}
+\item{name_C}{A character string indicating the name of the dataset containing the outcome variable.}
 
-\item{name}{saved new table name}
+\item{newobj}{An optional character string indicating the name of the object to store the computed odds in. Default is NULL.}
 
-\item{pos}{distance measure}
-
-\item{form}{formula used for glm}
+\item{datasources}{An optional list of DataSHIELD data source connections to use. If NULL, the function will attempt to find connections using the \code{\link{datashield.connections_find}} function.}
+}
+\value{
+The computed odds as a DataSHIELD object.
 }
 \description{
-generate prop scores server side
+This function computes odds using propensity scores for a given dataset and outcome variable using DataSHIELD.
 }

@@ -23,20 +23,50 @@ ds.did(
   clustervars = NULL,
   est_method = "dr",
   maxit = 10000,
-  seed_append = 12345,
   datasources = NULL,
   clear_console = FALSE
 )
 }
 \arguments{
+\item{data}{A string name of the dataframe containing the data on the server side.}
+
+\item{yname}{Name of the outcome variable in the data frame on the server side.}
+
+\item{tname}{Name of the time variable in the data frame on the server side.}
+
+\item{idname}{Name of the id variable in the data frame on the server side.}
+
+\item{gname}{Name of the treatment indicator variable in the data frame on the server side.}
+
+\item{t_periods}{Vector of time periods.}
+
+\item{g_periods}{Vector of treatment periods.}
+
+\item{xformla}{Formula of covariates.}
+
+\item{control_group}{either "nevertreated" or "notyettreated"}
+
+\item{base_period}{either "varying" or "universal".}
+
+\item{anticipation}{integer of pre-treatment anticipation.}
+
+\item{alpha}{Confidence level of CIs.}
+
+\item{bstrap}{If TRUE, multiplier bootstrap is used to compute standard errors.}
+
+\item{biters}{Number of bootstrap draws. Only relevenat if bstrap is TRUE.}
+
+\item{cband}{if TRUE, simultaneous confidence bands are returned.}
+
 \item{clustervars}{A string name of the vector of variables that make up the cluster for standard errors. Only has an influence if bstrap is true.}
+
+\item{est_method}{can either be "dr", "reg" or "ipw".}
+
+\item{maxit}{MAximal number of iterations for ds.glm.}
 
 \item{datasources}{A specific Datashield data source to which the result should be assigned.}
 
-\item{df}{A string name of the dataframe containing the data on the server side.}
-}
-\value{
-aaa
+\item{clear_console}{If TRUE, the coinsole is yleared at certain stages.}
 }
 \description{
 The function calculates the influence of a cluster of variables on a target variable using an influence matrix on the server side.lows for the option to assign the result to a new object or a specific data source.

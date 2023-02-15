@@ -1,12 +1,6 @@
 #' generate prop scores server side
-#'
-#' @param object table name
-#' @param name saved new table name
-#' @param pos distance measure
-#' @param form formula used for glm
+#' @param x just a helper
 #' @param datasources connection
-#'
-#' @return
 #' @export
 ds.buildHelper <- function(x,
                        datasources = NULL){

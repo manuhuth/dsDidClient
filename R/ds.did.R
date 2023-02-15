@@ -1,27 +1,25 @@
 #' @title clusterInfluenceFunction
 #' @description The function calculates the influence of a cluster of variables on a target variable using an influence matrix on the server side.lows for the option to assign the result to a new object or a specific data source.
-#' @param df A string name of the dataframe containing the data on the server side.
-#' @param yname
-#' @param tname
-#' @param idname
-#' @param gname
-#' @param t_periods
-#' @param g_periods
-#' @param xformla
-#' @param control_group
-#' @param base_period
-#' @param anticipation
-#' @param alpha
-#' @param bstrap
-#' @param biters
-#' @param cband
+#' @param data A string name of the dataframe containing the data on the server side.
+#' @param yname Name of the outcome variable in the data frame on the server side.
+#' @param tname Name of the time variable in the data frame on the server side.
+#' @param idname Name of the id variable in the data frame on the server side.
+#' @param gname Name of the treatment indicator variable in the data frame on the server side.
+#' @param t_periods Vector of time periods.
+#' @param g_periods Vector of treatment periods.
+#' @param xformla Formula of covariates.
+#' @param control_group either "nevertreated" or "notyettreated"
+#' @param base_period either "varying" or "universal".
+#' @param anticipation integer of pre-treatment anticipation.
+#' @param alpha Confidence level of CIs.
+#' @param bstrap If TRUE, multiplier bootstrap is used to compute standard errors.
+#' @param biters Number of bootstrap draws. Only relevenat if bstrap is TRUE.
+#' @param cband if TRUE, simultaneous confidence bands are returned.
 #' @param clustervars A string name of the vector of variables that make up the cluster for standard errors. Only has an influence if bstrap is true.
-#' @param est_method
-#' @param maxit
-#' @param seed_append
+#' @param est_method can either be "dr", "reg" or "ipw".
+#' @param maxit MAximal number of iterations for ds.glm.
 #' @param datasources A specific Datashield data source to which the result should be assigned.
-#' @param clear_console
-#' @return aaa
+#' @param clear_console If TRUE, the coinsole is yleared at certain stages.
 #' @export
 
 ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname = NULL,
@@ -31,7 +29,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
                    base_period = "varying",
                    anticipation = 0, alpha = 0.05,
                    bstrap = FALSE, biters = 1000, cband = TRUE, clustervars = NULL,
-                   est_method = "dr", maxit = 10000, seed_append=12345,
+                   est_method = "dr", maxit = 10000,
                    datasources = NULL, clear_console = FALSE) {
 
 
@@ -781,14 +779,14 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       ds.sendToServer(n, newobj = "n", datasources = datasources_subsetted)
       ds.make("dr_att_inf_func / n", newobj="dr_att_inf_func_n")
 
-      ds.AppendInfluence(seed_append, "influence_matrix", "dr_att_inf_func_n",
+      ds.AppendInfluence("influence_matrix", "dr_att_inf_func_n",
                          "ids_g_t",
           index_iteration,
           newobj = "influence_matrix",
           datasources = datasources_subsetted#[[i]]
       )
 
-      ds.AppendInfluence(seed_append, "influence_matrix_not_divided",
+      ds.AppendInfluence("influence_matrix_not_divided",
                          "dr_att_inf_func", "ids_g_t",
                          index_iteration,
                          newobj = "influence_matrix_not_divided",
@@ -989,6 +987,6 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
 
 
-  return(MP(group=group, t=tt, att=att, V_analytical=V, se=se, c=z_value,
+  return(did::MP(group=group, t=tt, att=att, V_analytical=V, se=se, c=z_value,
             inffunc=NULL, n=n_global, W=W, Wpval=W_pval, alp = alpha, DIDparams=dp))
 }
