@@ -802,7 +802,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       #if (correct_asymp_std_errors) {
       #  correction <- sum( (unlist(noise_sd_control_difference)^2 / mean_G^2 + unlist(noise_sd_treat)^2 / mean_odds^2) * unlist(sample_sizes) ) / n^2
       #}
-      d <<- n
+
       ds.make("dr_att_inf_func * dr_att_inf_func", newobj="psi_inner_product",
               datasources = datasources_subsetted)
 
@@ -836,7 +836,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
   dimensions_influence <- ds.dim("influence_matrix", datasources = datasources_subsetted)
   n_global <- dimensions_influence[[length(dimensions_influence)]][1]
-  n_std_error <<- n_global # is overwritten if clustered standard errors; otherwise we cluster at the individual level
+  n_std_error <- n_global # is overwritten if clustered standard errors; otherwise we cluster at the individual level
 
   ds.sendToServer(n_global, newobj = "n_global",
                   datasources = datasources_subsetted)
@@ -947,7 +947,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
   # TODO check function; as above
   #TODO reduce using + and divide by n_global
 
-  V <<- Reduce("+", ds.computeMatrixCrossproduct("influence_matrix_not_divided",
+  V <- Reduce("+", ds.computeMatrixCrossproduct("influence_matrix_not_divided",
                                     datasources = datasources_subsetted)) / n_global
 
   #V3 <<- t(inf) %*% inf / n_global
