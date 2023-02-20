@@ -7,6 +7,8 @@
 # Federated Difference-in-Differences with multiple time periods
 We propose dsDid a federated learning package with a federated version of the DID approach of [Callaway and Sant'Anna](https://www.sciencedirect.com/science/article/abs/pii/S0304407620303948) at its core. It allows for the federated estimation of treatment effects per period and the corresponding federated uncertainty quantification. Given convergence of the generalized linear models used to construct the treatment effects of the DID estimate, we are able to obtain exact federated treatment effects and asymptotic standard errors, as well as distributional equivalent bootstrapped standard errors.
 
+![alt text](https://github.com/manuhuth/dsDidClient/blob/main/images/ds_did.png?raw=true)
+
 ## Federated Learning
 Federated Learning enables collaboration among multiple data owners who only share summary statistics, resulting in joint model training with larger sample sizes as for individual local training, all while preserving indiviudal data privacy. The increased sample sizes lead to stronger statistical power and therefore to a more rigorous falsification of statistical hypotheses. Federated Learning can produce parameter estimates with convergence properties identical to pooled estimates or even the same parameter estimates.
 
