@@ -8,6 +8,5 @@
 
 library(testthat)
 library(dsDidClient)
-install.packages('DSLite', dependencies=TRUE)
 
 test_check("dsDidClient")

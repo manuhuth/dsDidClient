@@ -52,7 +52,7 @@ jobs:
         run: |
           install.packages('dsBaseClient', repos=c(getOption('repos'), 'http://cran.datashield.org'), dependencies=TRUE)
           install.packages('dsBase', repos=c(getOption('repos'), 'http://cran.datashield.org'), dependencies=TRUE)
-          install.packages('DSLite', dependencies=TRUE)
+          install.packages('DSLite', repos = "http://cran.us.r-project.org", dependencies=TRUE)
           install.packages('devtools')
           library(dsBase)
           library(dsBaseClient)
