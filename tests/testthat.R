@@ -8,5 +8,13 @@
 
 library(testthat)
 library(dsDidClient)
-
+install.packages('dsBaseClient', repos=c(getOption('repos'), 'http://cran.datashield.org'), dependencies=TRUE)
+install.packages('dsBase', repos=c(getOption('repos'), 'http://cran.datashield.org'), dependencies=TRUE)
+install.packages('DSLite', repos = "http://cran.us.r-project.org", dependencies=TRUE)
+install.packages('devtools', repos = "http://cran.us.r-project.org")
+library(dsBase)
+library(dsBaseClient)
+library(DSLite)
+library(devtools)
+devtools::install_github("manuhuth/dsDid")
 test_check("dsDidClient")
