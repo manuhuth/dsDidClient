@@ -30,4 +30,6 @@ test_that("ds_run_doubly_robust", {
                                   datasources = connections,
                                   clear_console=TRUE)
 
+  print(datashield.errors())
+
 })
