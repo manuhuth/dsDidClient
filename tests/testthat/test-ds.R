@@ -20,7 +20,7 @@ test_that("ds_run_doubly_robust", {
 
   our_federated_package <- ds.did(yname="Y", tname="period", idname="id", gname="G",
                                   t_periods = c(2, 3), g_periods=c(2, 3),
-                                  data="D", xformla="X",
+                                  data="D", #xformla="X",
                                   control_group= "notyettreated",
                                   anticipation=0,  alpha=0.05,
                                   base_period = "varying",
@@ -30,6 +30,5 @@ test_that("ds_run_doubly_robust", {
                                   datasources = connections,
                                   clear_console=TRUE)
 
-  print(datashield.errors())
 
 })
