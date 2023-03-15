@@ -29,6 +29,6 @@ test_that("ds_run_doubly_robust", {
                                   est_method="dr",
                                   datasources = connections,
                                   clear_console=TRUE)
-
+print(DSI::datashield.errors())
 
 })
