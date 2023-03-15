@@ -48,6 +48,9 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Add curl dependency
+        run: sudo apt install r-cran-curl
+
       - name: Add dsBaseClient repository
         run: |
           install.packages('dsBaseClient', repos= 'http://cran.datashield.org', dependencies=TRUE)

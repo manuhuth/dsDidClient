@@ -26,6 +26,9 @@ jobs:
           extra-packages: any::covr
           needs: coverage
 
+      - name: Add curl dependency
+        run: sudo apt install r-cran-curl
+
       - name: Test coverage
         run: |
           install.packages('dsBaseClient', repos= 'http://cran.datashield.org', dependencies=TRUE)
