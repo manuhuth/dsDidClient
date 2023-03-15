@@ -49,7 +49,8 @@ jobs:
           use-public-rspm: true
 
       - name: Add curl dependency
-        run: sudo apt install r-cran-curl
+        run: |
+          sudo apt install r-cran-curl
 
       - name: Add dsBaseClient repository
         run: |
