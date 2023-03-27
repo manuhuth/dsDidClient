@@ -63,24 +63,25 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-
-
 <div class="section level1">
 <div class="page-header"><h1 id="federated-difference-in-differences-with-multiple-time-periods">Federated Difference-in-Differences with multiple time periods<a class="anchor" aria-label="anchor" href="#federated-difference-in-differences-with-multiple-time-periods"></a>
 </h1></div>
 <p>We propose dsDid a federated learning package with a federated version of the DID approach of <a href="https://www.sciencedirect.com/science/article/abs/pii/S0304407620303948" class="external-link">Callaway and Sant’Anna</a> at its core. It allows for the federated estimation of treatment effects per period and the corresponding federated uncertainty quantification. Given convergence of the generalized linear models used to construct the treatment effects of the DID estimate, we are able to obtain exact federated treatment effects and asymptotic standard errors, as well as distributional equivalent bootstrapped standard errors.</p>
-<div class="figure">
-<img src="https://github.com/manuhuth/dsDidClient/blob/main/images/ds_did.png?raw=true" alt=""><p class="caption">alt text</p>
-</div>
 <div class="section level2">
 <h2 id="federated-learning">Federated Learning<a class="anchor" aria-label="anchor" href="#federated-learning"></a>
 </h2>
 <p>Federated Learning enables collaboration among multiple data owners who only share summary statistics, resulting in joint model training with larger sample sizes as for individual local training, all while preserving indiviudal data privacy. The increased sample sizes lead to stronger statistical power and therefore to a more rigorous falsification of statistical hypotheses. Federated Learning can produce parameter estimates with convergence properties identical to pooled estimates or even the same parameter estimates.</p>
+<div class="figure">
+<img src="https://github.com/manuhuth/dsDidClient/blob/main/images/learning_paradigma.png?raw=true" alt=""><p class="caption">alt text</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="implementation-in-rdatashield">Implementation in RDataSHIELD<a class="anchor" aria-label="anchor" href="#implementation-in-rdatashield"></a>
 </h2>
-<p><a href="https://www.datashield.org/" class="external-link">RDataSHIELD</a> provides a Federated Learning platform that addresses the most fundamental challenges in facilitating the access of researchers and other healthcare professionals to individual-level data. Although initially developed for work in the biomedical and social sciences, DataSHIELD can be used in any setting where microdata (data on individual subjects) must be analysed but cannot physically be shared with the research users.</p>
+<p><a href="https://www.datashield.org/" class="external-link">DataSHIELD</a> provides a Federated Learning platform that addresses the most fundamental challenges in facilitating the access of researchers and other healthcare professionals to individual-level data. Although initially developed for work in the biomedical and social sciences, DataSHIELD can be used in any setting where microdata (data on individual subjects) must be analysed but cannot physically be shared with the research users.</p>
+<div class="figure">
+<img src="https://github.com/manuhuth/dsDidClient/blob/main/images/implementation.png?raw=true" alt=""><p class="caption">alt text</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="ensuring-data-privacy">Ensuring data privacy<a class="anchor" aria-label="anchor" href="#ensuring-data-privacy"></a>
@@ -88,7 +89,6 @@
 <p>dsDid incorporates the standard RDataSHIELD security measures such as validity checks on the minimum non-zero counts of observational units for e.g. mean calculations, and the maximum number of parameters in a regression. Additionally, it includes further security measures tailored to the needs of the difference-in-differences approach like random shuffling of rows, immediate processing of data that is send from the client to the server in order to prevent attacks as described in <a href="https://www.biorxiv.org/content/10.1101/2022.10.09.511497v1" class="external-link">Huth et al. (2022)</a>, and allowing only single numbers to be send to the servers. Hence, we do not recommend to use this package ds.cbind or ds.rbind from the <a href="https://github.com/datashield/dsBaseClient" class="external-link">ds.Base</a> package.</p>
 </div>
 </div>
-
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -123,14 +123,7 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/manuhuth/dsDidClient/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/manuhuth/dsDidClient/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://app.codecov.io/gh/manuhuth/dsDidClient?branch=main" class="external-link"><img src="https://codecov.io/gh/manuhuth/dsDidClient/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
-<li><a href="https://github.com/manuhuth/dsDidClient/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/manuhuth/dsDidClient/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-</ul>
-</div>
+
 
   </div>
 </div>
