@@ -21,11 +21,9 @@ Suggests:
 Config/testthat/edition: 3
 Imports: 
     did,
-    dsBase,
     dsBaseClient,
     DSI,
     stats,
     methods
 Remotes: 
     datashield/dsBaseClient
-    datashield/dsBase
