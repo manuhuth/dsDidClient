@@ -16,23 +16,24 @@ test_that("ds_test_basic_set_up_check", {
    expect_equal(mean_X, mean(test_data$X))
 })
 
-# test_that("ds_run_doubly_robust", {
-#
-#   data_object <- create_test_data(seed=12345)
-#   connections <- data_object$datasources
-#   data <- data_object$datasources
-#
-#   our_federated_package <- ds.did(yname="Y", tname="period", idname="id", gname="G",
-#                                   t_periods = c(2, 3), g_periods=c(2, 3),
-#                                   data="D", #xformla="X",
-#                                   control_group= "notyettreated",
-#                                   anticipation=0,  alpha=0.05,
-#                                   base_period = "varying",
-#                                   bstrap=FALSE, biters = 1000, cband = TRUE,
-#                                   clustervars = NULL,
-#                                   est_method="dr",
-#                                   datasources = connections,
-#                                   clear_console=TRUE)
-# print(DSI::datashield.errors())
-#
-# })
+test_that("ds_run_doubly_robust", {
+
+  data_object <- create_test_data(seed=12345)
+  connections <- connections
+  data <- data_object$datasources
+
+  our_federated_package <- suppressWarnings(ds.did(yname="Y", tname="period", idname="id", gname="G",
+                                  t_periods = c(2, 3), g_periods=c(2, 3),
+                                  data="D", xformla = NULL,#xformla="X",
+                                  control_group= "notyettreated",
+                                  anticipation=0,  alpha=0.05,
+                                  base_period = "varying",
+                                  bstrap=FALSE, biters = 1000, cband = TRUE,
+                                  clustervars = NULL,
+                                  est_method="dr",
+                                  datasources = connections,
+                                  clear_console=TRUE))
+
+  expect_no_error(our_federated_package)
+
+})
