@@ -777,18 +777,18 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
         # TODO recheck function
       ds.sendToServer(n, newobj = "n", datasources = datasources_subsetted)
-      dsBaseClient::ds.make("dr_att_inf_func / n", newobj="dr_att_inf_func_n")
+      dsBaseClient::ds.make("dr_att_inf_func / n", newobj="dr_att_inf_func_n", datasources = datasources_subsetted)
 
-      ds.AppendInfluence("influence_matrix", "dr_att_inf_func_n",
-                         "ids_g_t",
-          index_iteration,
+      ds.AppendInfluence(df = "influence_matrix", influences = "dr_att_inf_func_n",
+                         id_period_vector = "ids_g_t",
+          column = index_iteration,
           newobj = "influence_matrix",
           datasources = datasources_subsetted#[[i]]
       )
 
-      ds.AppendInfluence("influence_matrix_not_divided",
-                         "dr_att_inf_func", "ids_g_t",
-                         index_iteration,
+      ds.AppendInfluence(df = "influence_matrix_not_divided",
+                         influences = "dr_att_inf_func", id_period_vector= "ids_g_t",
+                         column = index_iteration,
                          newobj = "influence_matrix_not_divided",
                          datasources = datasources_subsetted#[[i]]
       )
