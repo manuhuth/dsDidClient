@@ -6,10 +6,14 @@ test_that("ds_did_works", {
 test_that("ds_test_basic_set_up_check", {
 
    data_object <- create_test_data(seed=12345)
-   connections <- data_object$datasources
+   connections <- connections
    data <- data_object$datasources
 
-   dsBaseClient::ds.mean(x="D$X", datasources = connections)
+   test_data <- data_object$data
+
+   mean_X <- dsBaseClient::ds.mean(x="D$X", type = 'combine', datasources = connections)
+   mean_X <- as.numeric(mean_X$Global.Mean[1])
+   expect_equal(mean_X, mean(test_data$X))
 })
 
 # test_that("ds_run_doubly_robust", {
