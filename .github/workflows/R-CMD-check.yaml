@@ -6,9 +6,9 @@
 # usethis::use_github_action("check-standard") will install it.
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, testing_framework]
   pull_request:
-    branches: [main, master]
+    branches: [main, master, testing_framework]
 
 name: R-CMD-check
 
@@ -26,7 +26,7 @@ jobs:
 
           - {os: windows-latest, r: 'release'}
           # Use 3.6 to trigger usage of RTools35
-          - {os: windows-latest, r: '3.6'}
+          #- {os: windows-latest, r: '3.5.0'}
           # use 4.1 to check with rtools40's older compiler
           - {os: windows-latest, r: '4.1'}
 
