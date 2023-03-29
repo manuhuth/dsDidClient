@@ -18,8 +18,8 @@ test_that("ds_test_basic_set_up_check", {
    print(a[[1]])
    print(typeof(a[[1]][1]))
 
-   expect_error(dsBaseClient::ds.recodeValues("D$period", values2replace.vector = c("1"), newobj="b",
-                   new.values.vector = c(3), datasources = connections))
+   expect_error(dsBaseClient::ds.recodeValues("D$period", values2replace.vector = 1, newobj="b",
+                   new.values.vector = 3, datasources = connections))
    print(DSI::datashield.errors())
 
    expect_equal(mean_X, mean(test_data$X))
@@ -42,7 +42,7 @@ test_that("ds_test_basic_set_up_check", {
 #                                   est_method="dr",
 #                                   datasources = connections,
 #                                   clear_console=TRUE)
-#
+
 #   expect_no_error(our_federated_package)
-#
-# })
+
+ #})
