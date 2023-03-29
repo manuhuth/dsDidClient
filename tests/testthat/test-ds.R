@@ -14,8 +14,12 @@ test_that("ds_test_basic_set_up_check", {
    mean_X <- dsBaseClient::ds.mean(x="D$X", type = 'combine', datasources = connections)
    mean_X <- as.numeric(mean_X$Global.Mean[1])
 
+   a <- ds.buildHelper("D$period")
+   print(a[[1]])
+   print(typeof(a[[1]][1]))
+
    expect_error(dsBaseClient::ds.recodeValues("D$period", values2replace.vector = c("1"), newobj="b",
-                   new.values.vector = c("3"), datasources = connections))
+                   new.values.vector = c(3), datasources = connections))
    print(DSI::datashield.errors())
 
    expect_equal(mean_X, mean(test_data$X))
