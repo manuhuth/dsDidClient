@@ -1,8 +1,3 @@
-test_that("ds_did_works", {
-  expect_equal(2 * 3, 6)
-})
-
-
 test_that("ds_test_basic_set_up_check", {
 
    data_object <- create_test_data(seed=12345)
