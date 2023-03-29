@@ -13,7 +13,7 @@ test_that("ds_test_basic_set_up_check", {
 
    mean_X <- dsBaseClient::ds.mean(x="D$X", type = 'combine', datasources = connections)
    mean_X <- as.numeric(mean_X$Global.Mean[1])
-   dsBaseClient::ds.asMatrix("D$X")
+   dsBaseClient::ds.asMatrix("D$X", datasources = connections)
    expect_equal(mean_X, mean(test_data$X))
 })
 
