@@ -335,7 +335,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
           datasources = datasources_subsetted
         )
 
-        dsBaseClient::ds.asMatrix("delta_y_fitted", newobj = "delta_y_fitted", datasources = datasources_subsetted)
+        #dsBaseClient::ds.asMatrix("delta_y_fitted", newobj = "delta_y_fitted", datasources = datasources_subsetted)
       }
 
       # run logit regression on P(G=g |X, G_g + C = 1) -> only treated in g or never treated (observations in df_analysis)
@@ -383,7 +383,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
           datasources = datasources_subsetted
         )
 
-        dsBaseClient::ds.asMatrix("propensity_scores", newobj = "propensity_scores", datasources = datasources_subsetted)
+        #dsBaseClient::ds.asMatrix("propensity_scores", newobj = "propensity_scores", datasources = datasources_subsetted)
       }
 
       if (clear_console) {
@@ -468,10 +468,10 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
           datasources = datasources_subsetted
         )
 
-        dsBaseClient::ds.asMatrix("covariates_one",
-          newobj = "covariates_one",
-          datasources = datasources_subsetted
-        )
+        #dsBaseClient::ds.asMatrix("covariates_one",
+        #  newobj = "covariates_one",
+        #  datasources = datasources_subsetted
+        #)
       }
 
       # Asymptotic representation of OLS' betas
