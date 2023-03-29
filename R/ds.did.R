@@ -339,12 +339,17 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       }
 
       # run logit regression on P(G=g |X, G_g + C = 1) -> only treated in g or never treated (observations in df_analysis)
-      dsBaseClient::ds.recodeValues(
-        var.name = paste0("df_analysis$", gname),
-        values2replace.vector = c(g),
-        new.values.vector = c(1), newobj = "G_dummy",
-        datasources = datasources_subsetted
-      ) # create variable that is one for treated in g; rest 0
+      ds.recode(paste0("df_analysis$", gname),
+                replace_with = 1,
+                replace = g,
+                newobj = "G_dummy",
+                datasources = datasources_subsetted)
+      #dsBaseClient::ds.recodeValues(
+      #  var.name = paste0("df_analysis$", gname),
+      #  values2replace.vector = c(g),
+      #  new.values.vector = c(1), newobj = "G_dummy",
+      #  datasources = datasources_subsetted
+      #) # create variable that is one for treated in g; rest 0
 
       dsBaseClient::ds.cbind(
         x = c("df_analysis", "G_dummy"), newobj = "df_analysis_logit",

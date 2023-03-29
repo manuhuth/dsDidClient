@@ -14,35 +14,27 @@ test_that("ds_test_basic_set_up_check", {
    mean_X <- dsBaseClient::ds.mean(x="D$X", type = 'combine', datasources = connections)
    mean_X <- as.numeric(mean_X$Global.Mean[1])
 
-   a <- ds.buildHelper("D$period")
-   print(a[[1]])
-   print(typeof(a[[1]][1]))
-
-   expect_error(dsBaseClient::ds.recodeValues("D$period", values2replace.vector = 1, newobj="b",
-                   new.values.vector = 3, datasources = connections))
-   print(DSI::datashield.errors())
-
    expect_equal(mean_X, mean(test_data$X))
 })
 
-#test_that("ds_run_doubly_robust", {
+test_that("ds_run_doubly_robust", {
 
-#   data_object <- create_test_data(seed=12345)
-#   connections <- connections
-#   data <- data_object$datasources
+   data_object <- create_test_data(seed=12345)
+   connections <- connections
+   data <- data_object$datasources
 
-#   our_federated_package <- ds.did(yname="Y", tname="period", idname="id", gname="G",
-#                                  t_periods = c(2, 3), g_periods=c(2, 3),
-#                                 data="D", xformla="X",
-#                                   control_group= "notyettreated",
-#                                   anticipation=0,  alpha=0.05,
-#                                   base_period = "varying",
-#                                   bstrap=FALSE, biters = 1000, cband = TRUE,
-#                                   clustervars = NULL,
-#                                   est_method="dr",
-#                                   datasources = connections,
-#                                   clear_console=TRUE)
+   our_federated_package <- ds.did(yname="Y", tname="period", idname="id", gname="G",
+                                  t_periods = c(2, 3), g_periods=c(2, 3),
+                                 data="D", xformla="X",
+                                   control_group= "notyettreated",
+                                   anticipation=0,  alpha=0.05,
+                                   base_period = "varying",
+                                   bstrap=FALSE, biters = 1000, cband = TRUE,
+                                   clustervars = NULL,
+                                   est_method="dr",
+                                   datasources = connections,
+                                   clear_console=TRUE)
 
-#   expect_no_error(our_federated_package)
+   expect_no_error(our_federated_package)
 
- #})
+})
