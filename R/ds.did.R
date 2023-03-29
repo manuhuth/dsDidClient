@@ -408,22 +408,22 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       } else if (est_method == "dr") {
 
         # treatment and control group for dr estimator
-        dsBaseClient::ds.make("df_analysis_logit$G_dummy * (delta_y - delta_y_fitted)", "att_treat",
+        suppressWarnings(dsBaseClient::ds.make("df_analysis_logit$G_dummy * (delta_y - delta_y_fitted)", "att_treat",
           datasources = datasources_subsetted
-        )
+        ))
 
-        dsBaseClient::ds.make("odds * (delta_y - delta_y_fitted)", "att_cont",
+        suppressWarnings(dsBaseClient::ds.make("odds * (delta_y - delta_y_fitted)", "att_cont",
           datasources = datasources_subsetted
-        )
+        ))
       } else if (est_method == "ipw") {
         # treatment and control group for ipw estimator
-        dsBaseClient::ds.make("df_analysis_logit$G_dummy * (delta_y)", "att_treat",
+        suppressWarnings(dsBaseClient::ds.make("df_analysis_logit$G_dummy * (delta_y)", "att_treat",
           datasources = datasources_subsetted
-        )
+        ))
 
-        dsBaseClient::ds.make("odds * (delta_y)", "att_cont",
+        suppressWarnings(dsBaseClient::ds.make("odds * (delta_y)", "att_cont",
           datasources = datasources_subsetted
-        )
+        ))
       } else {
         stop("Estimation method must either be reg, dr or ipw.")
       }
@@ -535,10 +535,10 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       # only numbers are possible
       ds.sendToServer(eta_treat, newobj = "eta_treat_server",
                       datasources = datasources_subsetted)
-      dsBaseClient::ds.make("(att_treat - df_analysis_logit$G_dummy * eta_treat_server)",
+      suppressWarnings(dsBaseClient::ds.make("(att_treat - df_analysis_logit$G_dummy * eta_treat_server)",
         newobj = "inf_treat_1",
         datasources = datasources_subsetted
-      )
+      ))
 
       # Estimation effect from beta hat
       # Derivative matrix (k x 1 vector)
@@ -583,8 +583,8 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
       ds.sendToServer(mean_G, newobj = "mean_G",
                       datasources = datasources_subsetted)
-      dsBaseClient::ds.make("inf_treat_1 / mean_G", newobj = "inf_treat_1_G",
-              datasources = datasources_subsetted)
+      suppressWarnings(dsBaseClient::ds.make("inf_treat_1 / mean_G", newobj = "inf_treat_1_G",
+              datasources = datasources_subsetted))
       suppressWarnings(dsBaseClient::ds.make("inf_treat_2 / mean_G", newobj = "inf_treat_2_G",
               datasources = datasources_subsetted))
 
@@ -601,10 +601,10 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       ds.sendToServer(eta_cont, newobj = "eta_cont_server",
                       datasources = datasources_subsetted)
 
-      dsBaseClient::ds.make("(att_cont - odds * eta_cont_server)",
+      suppressWarnings(dsBaseClient::ds.make("(att_cont - odds * eta_cont_server)",
         newobj = "inf_cont_1",
         datasources = datasources_subsetted
-      )
+      ))
       # inf.cont.1 <- (dr.att.cont - w.cont * eta.cont)
 
 
