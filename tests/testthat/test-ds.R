@@ -35,6 +35,32 @@ test_that("ds_run_doubly_robust", {
                                    datasources = connections,
                                    clear_console=TRUE)
 
+
+
    expect_no_error(our_federated_package)
+
+})
+
+test_that("ds_run_doubly_robust_covs", {
+
+  data_object <- create_test_data(seed=1235)
+  connections <- connections
+  data <- data_object$datasources
+
+  our_federated_package <- ds.did(yname="Y", tname="period", idname="id", gname="G",
+                                  t_periods = c(2, 3), g_periods=c(2, 3),
+                                  data="D", xformla="X",
+                                  control_group= "notyettreated",
+                                  anticipation=0,  alpha=0.05,
+                                  base_period = "varying",
+                                  bstrap=TRUE, biters = 30, cband = TRUE,
+                                  clustervars = NULL,
+                                  est_method="dr",
+                                  datasources = connections,
+                                  clear_console=TRUE)
+
+
+
+  expect_no_error(our_federated_package)
 
 })
