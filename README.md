@@ -1,3 +1,9 @@
+<!-- badges: start -->
+  [![R-CMD-check](https://github.com/manuhuth/dsDidClient/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/manuhuth/dsDidClient/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/manuhuth/dsDidClient/branch/main/graph/badge.svg)](https://app.codecov.io/gh/manuhuth/dsDidClient?branch=main)
+[![R-CMD-check](https://github.com/manuhuth/dsDidClient/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/manuhuth/dsDidClient/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 # Federated Difference-in-Differences with multiple time periods
 We propose dsDid a federated learning package with a federated version of the DID approach of [Callaway and Sant'Anna](https://www.sciencedirect.com/science/article/abs/pii/S0304407620303948) at its core. It allows for the federated estimation of treatment effects per period and the corresponding federated uncertainty quantification. Given convergence of the generalized linear models used to construct the treatment effects of the DID estimate, we are able to obtain exact federated treatment effects and asymptotic standard errors, as well as distributional equivalent bootstrapped standard errors.
 

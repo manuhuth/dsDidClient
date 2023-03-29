@@ -19,7 +19,7 @@ test_that("ds_test_basic_set_up_check", {
 
 test_that("ds_run_doubly_robust", {
 
-   data_object <- create_test_data(seed=12345)
+   data_object <- create_test_data(seed=1235)
    connections <- connections
    data <- data_object$datasources
 
