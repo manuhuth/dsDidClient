@@ -232,10 +232,10 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
 
       # create data frame with covariates, X variables, and G
-      dsBaseClient::ds.dataFrame(
+      suppressWarnings(dsBaseClient::ds.dataFrame(
         x = c("delta_y", paste0("df_g_t_lag$", gname)),
         newobj = "df_delta_y_g", datasources = datasources_subsetted
-      )
+      ))
 
 
 
@@ -585,8 +585,8 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
                       datasources = datasources_subsetted)
       dsBaseClient::ds.make("inf_treat_1 / mean_G", newobj = "inf_treat_1_G",
               datasources = datasources_subsetted)
-      dsBaseClient::ds.make("inf_treat_2 / mean_G", newobj = "inf_treat_2_G",
-              datasources = datasources_subsetted)
+      suppressWarnings(dsBaseClient::ds.make("inf_treat_2 / mean_G", newobj = "inf_treat_2_G",
+              datasources = datasources_subsetted))
 
       #inf_treat_object <- ds.computeInfTreatDifference("inf_treat_1", "inf_treat_2",
       #  datasources = datasources_subsetted
@@ -694,10 +694,10 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
       # Influence function for the control component
       # compute in1 + inf2 -> compute difference with function, compute mean, compute inf.control
-      dsBaseClient::ds.make("inf_cont_1 + inf_cont_2",
+      suppressWarnings(dsBaseClient::ds.make("inf_cont_1 + inf_cont_2",
         newobj = "inf_cont_helper",
         datasources = datasources_subsetted
-      )
+      ))
 
       # TODO
       # dsBaseClient::ds.make?
@@ -716,11 +716,11 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
       ds.sendToServer(odds_mean, newobj = "odds_mean",
                       datasources = datasources_subsetted)
-      dsBaseClient::ds.make("inf_cont_helper / odds_mean", newobj = "inf_cont_helper_p",
-              datasources = datasources_subsetted)
+      suppressWarnings(dsBaseClient::ds.make("inf_cont_helper / odds_mean", newobj = "inf_cont_helper_p",
+              datasources = datasources_subsetted))
 
-      dsBaseClient::ds.make("inf_cont_3 / odds_mean", newobj = "inf_cont_3_p",
-              datasources = datasources_subsetted)
+      suppressWarnings(dsBaseClient::ds.make("inf_cont_3 / odds_mean", newobj = "inf_cont_3_p",
+              datasources = datasources_subsetted))
 
 
 
@@ -735,8 +735,8 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
         #dr_att_inf_func <<-  unlist(inf_treat) / mean_G - inf_control # divide by mean of G here because we cannot do it when inf_treat is created
 
-        dsBaseClient::ds.make("inf_treat_1_G - inf_treat_2_G - inf_cont_helper_p + inf_cont_3_p",
-                newobj="dr_att_inf_func", datasources = datasources_subsetted)
+        suppressWarnings(dsBaseClient::ds.make("inf_treat_1_G - inf_treat_2_G - inf_cont_helper_p + inf_cont_3_p",
+                newobj="dr_att_inf_func", datasources = datasources_subsetted))
 
         } else if (est_method %in% c("ipw", "reg")) {
         dsBaseClient::ds.make(paste0("inf_treat_1 / ", mean_G),
@@ -777,7 +777,9 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
         # TODO recheck function
       ds.sendToServer(n, newobj = "n", datasources = datasources_subsetted)
-      dsBaseClient::ds.make("dr_att_inf_func / n", newobj="dr_att_inf_func_n", datasources = datasources_subsetted)
+      suppressWarnings(dsBaseClient::ds.make("dr_att_inf_func / n",
+                                             newobj="dr_att_inf_func_n",
+                                             datasources = datasources_subsetted))
 
       ds.AppendInfluence(df = "influence_matrix", influences = "dr_att_inf_func_n",
                          id_period_vector = "ids_g_t",
@@ -801,8 +803,8 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       #  correction <- sum( (unlist(noise_sd_control_difference)^2 / mean_G^2 + unlist(noise_sd_treat)^2 / mean_odds^2) * unlist(sample_sizes) ) / n^2
       #}
 
-      dsBaseClient::ds.make("dr_att_inf_func * dr_att_inf_func", newobj="psi_inner_product",
-              datasources = datasources_subsetted)
+      suppressWarnings(dsBaseClient::ds.make("dr_att_inf_func * dr_att_inf_func", newobj="psi_inner_product",
+              datasources = datasources_subsetted))
 
       #mean(t(psi) * psi) = psi^T * psi / n -> need to divide gloabl mean by sqrt n
       se_dr_att <- (dsBaseClient::ds.mean("psi_inner_product", type = "combined",
@@ -839,10 +841,10 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
   ds.sendToServer(n_global, newobj = "n_global",
                   datasources = datasources_subsetted)
 
-  dsBaseClient::ds.make(paste0("influence_matrix * n_global"),
+  suppressWarnings(dsBaseClient::ds.make(paste0("influence_matrix * n_global"),
     newobj = "influence_matrix_adjusted",
     datasources = datasources_subsetted
-  ) # adjust by multiplying with total amount (done in original package with n)
+  )) # adjust by multiplying with total amount (done in original package with n)
 
   name_influence_use <- "influence_matrix_adjusted"
 
