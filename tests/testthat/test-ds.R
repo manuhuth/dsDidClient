@@ -32,7 +32,7 @@ test_that("ds_run_doubly_robust", {
 
 
 
-   #expect_no_error(our_federated_package)
+   expect_no_error(our_federated_package)
 
 })
 
@@ -55,7 +55,6 @@ test_that("ds_run_doubly_robust_covs", {
                                   clear_console=TRUE)
 
 
-
-  #expect_no_error(our_federated_package)
+  testthat::expect_no_error(our_federated_package)
 
 })
