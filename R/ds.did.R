@@ -232,10 +232,10 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
 
       # create data frame with covariates, X variables, and G
-      suppressWarnings(dsBaseClient::ds.dataFrame(
+      dsBaseClient::ds.dataFrame(stringsAsFactors = FALSE,
         x = c("delta_y", paste0("df_g_t_lag$", gname)),
         newobj = "df_delta_y_g", datasources = datasources_subsetted
-      ))
+      )
 
 
 
