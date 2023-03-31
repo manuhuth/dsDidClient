@@ -742,8 +742,6 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       # get the influence function of the DR estimator (put all pieces together)
       if (est_method == "dr") {
 
-        #dr_att_inf_func <<-  unlist(inf_treat) / mean_G - inf_control # divide by mean of G here because we cannot do it when inf_treat is created
-
         dsBaseClient::ds.make("inf_treat_1_G - inf_treat_2_G - inf_cont_helper_p + inf_cont_3_p",
                 newobj="dr_att_inf_func", datasources = datasources_subsetted)
 
@@ -851,7 +849,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
                   datasources = datasources_subsetted)
 
   ds.multiplyMatrixScalar("influence_matrix", "n_global",
-                          newobj="influence_matrix_adjusted2",
+                          newobj="influence_matrix_adjusted",
                           datasources = datasources_subsetted)
 
   name_influence_use <- "influence_matrix_adjusted"
@@ -957,8 +955,6 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
   V <- Reduce("+", ds.computeMatrixCrossproduct("influence_matrix_not_divided",
                                     datasources = datasources_subsetted)) / n_global
-
-  #V3 <<- t(inf) %*% inf / n_global
 
   pre <-out[, "Group"] > out[, "Time"]
   pre_att <-as.matrix(out[pre, "ATT"])

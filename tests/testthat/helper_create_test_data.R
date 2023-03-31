@@ -1,11 +1,11 @@
 create_test_data <- function(seed, time.periods = 3 ){
   set.seed(seed)
-  sim_par <- did::reset.sim(time.periods=time.periods, n=1000, ipw=TRUE, reg=TRUE)
+  sim_par <- did::reset.sim(time.periods=time.periods, n=7000, ipw=TRUE, reg=TRUE)
   dta <- did::build_sim_dataset(sim_par)
   dta["X2"] <- dta["X"] + rnorm(nrow(dta), 0, 1)
   dta["X3"] <- dta["X"] + rnorm(nrow(dta), 0, 1)
   dta["X4"] <- dta["X"] + rnorm(nrow(dta), 0, 1)
-
+  dta["Y"] <- 3 * dta["X"] - 1.5*dta["X2"]
   dta <-dta[order(dta$id, dta$period),]
 
   dta_0 <- dta[which(dta$treat == 0),]
