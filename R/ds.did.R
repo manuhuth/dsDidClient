@@ -303,19 +303,42 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
       if (!is.null(xformla)) { # compute expectation
         # run linear regression -> E(delta_y|X, G = 0)
-        linear_regression_object <- dsBaseClient::ds.glm(formula_linear_model,
+        linear_regression_object <- try({dsBaseClient::ds.glm(formula_linear_model,
           data = "df_analysis_non_treated",
           family = "gaussian",
           maxit = maxit,
-          datasources=datasources_subsetted
-        )
+          datasources=datasources_subsetted)
 
-        betas_lin_reg <- linear_regression_object$coefficients[, c(1)]
+          betas_lin_reg <- linear_regression_object$coefficients[, c(1)]
+          })
+
+        if(class(linear_regression_object) == "try-error") {
+          X_T_X <- Reduce("+", ds.computeMatrixCrossproduct("covariates_one",
+                                                datasources_subsetted))
+          covs <- c()
+          mean_y_temp <- ds.mean("df_analysis$delta_y", type="combined",
+                                 datasources = datasources_subsetted)$Global.Mean[1]
+          for (i in labels(terms(formula_linear_model))){
+            cov_temp <- ds.cov("df_analysis$delta_y", paste0("df_analysis$", i),
+                               type="combine",
+                               datasources = datasources_subsetted)
+            n_temp <- cov_temp$`Number of complete cases used`[2,1]
+
+            mean_x <- ds.mean(paste0("df_analysis$", i), type="combined",
+                              datasources = datasources_subsetted)$Global.Mean[1]
+
+            covs <- c(covs, cov_temp$`Variance-Covariance Matrix`[2,1]*(n_temp-1) + n_temp * mean_x * mean_y_temp )
+          }
+
+          betas_lin_reg <- solve(X_T_X) %*% as.matrix(covs)
+
+        }
 
         ds.multiplyMatrixMatrix("covariates_one", betas_lin_reg,
-          newobj = "delta_y_fitted",
-          datasources = datasources_subsetted
+                                newobj = "delta_y_fitted",
+                                datasources = datasources_subsetted
         )
+
       } else { # if no covariates, expectation is just the mean
 
         mean_delta_y <- dsBaseClient::ds.mean("df_analysis_non_treated$delta_y",
