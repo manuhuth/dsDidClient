@@ -68,12 +68,14 @@
 <div class="section level1">
 <div class="page-header"><h1 id="federated-difference-in-differences-with-multiple-time-periods">Federated Difference-in-Differences with multiple time periods<a class="anchor" aria-label="anchor" href="#federated-difference-in-differences-with-multiple-time-periods"></a>
 </h1></div>
-<p>We propose dsDid a federated learning package with a federated version of the DID approach of <a href="https://www.sciencedirect.com/science/article/abs/pii/S0304407620303948" class="external-link">Callaway and Sant’Anna</a> at its core. It allows for the federated estimation of treatment effects per period and the corresponding federated uncertainty quantification. Given convergence of the generalized linear models used to construct the treatment effects of the DID estimate, we are able to obtain exact federated treatment effects and asymptotic standard errors, as well as distributional equivalent bootstrapped standard errors. <img src="https://github.com/manuhuth/dsDidClient/blob/main/images/same_results.png?raw=true" alt="alt text"></p>
+<p>We propose dsDid a federated learning package with a federated version of the DID approach of <a href="https://www.sciencedirect.com/science/article/abs/pii/S0304407620303948" class="external-link">Callaway and Sant’Anna</a> at its core. It allows for the federated estimation of treatment effects per period and the corresponding federated uncertainty quantification. Given convergence of the generalized linear models used to construct the treatment effects of the DID estimate, we are able to obtain exact federated treatment effects and asymptotic standard errors, as well as distributional equivalent bootstrapped standard errors. <img src="https://github.com/manuhuth/dsDidClient/blob/main/images/same_results.png?raw=true" alt="alt text"><img src="https://github.com/manuhuth/dsDidClient/blob/main/images/deviances_sim_data_paper.png?raw=true" alt="alt text"></p>
 <div class="section level2">
 <h2 id="federated-learning">Federated Learning<a class="anchor" aria-label="anchor" href="#federated-learning"></a>
 </h2>
 <p>Federated Learning enables collaboration among multiple data owners who only share summary statistics, resulting in joint model training with larger sample sizes as for individual local training, all while preserving indiviudal data privacy. The increased sample sizes lead to stronger statistical power and therefore to a more rigorous falsification of statistical hypotheses. Federated Learning can produce parameter estimates with convergence properties identical to pooled estimates or even the same parameter estimates.</p>
-<p><img src="https://github.com/manuhuth/dsDidClient/blob/main/images/learning_paradigma.png?raw=true" alt="alt text"><img src="https://github.com/manuhuth/dsDidClient/blob/main/images/deviances_sim_data_paper.png?raw=true" alt="alt text"></p>
+<div class="figure">
+<img src="https://github.com/manuhuth/dsDidClient/blob/main/images/learning_paradigma.png?raw=true" alt=""><p class="caption">alt text</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="implementation-in-datashield">Implementation in DataSHIELD<a class="anchor" aria-label="anchor" href="#implementation-in-datashield"></a>
