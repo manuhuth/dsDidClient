@@ -1,4 +1,4 @@
-#' @title clusterInfluenceFunction
+#' @title Average treatment effect of the treated estimation
 #' @description The function calculates the influence of a cluster of variables on a target variable using an influence matrix on the server side.lows for the option to assign the result to a new object or a specific data source.
 #' @param data A string name of the dataframe containing the data on the server side.
 #' @param yname Name of the outcome variable in the data frame on the server side.
@@ -19,7 +19,7 @@
 #' @param est_method can either be "dr", "reg" or "ipw".
 #' @param maxit MAximal number of iterations for ds.glm.
 #' @param datasources A specific Datashield data source to which the result should be assigned.
-#' @param clear_console If TRUE, the coinsole is yleared at certain stages.
+#' @param clear_console If TRUE, the console is cleared at certain stages.
 #' @export
 
 ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname = NULL,
@@ -171,7 +171,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
                                               datasources = datasources
       )
 
-      valid_datasources_g_t <- as.vector(do.call(rbind, valid_treated)) * as.vector(do.call(rbind, valid_untreated)) * (1:length(valid_treated))
+      valid_datasources_g_t <- ((as.vector(do.call(rbind, valid_treated)) + as.vector(do.call(rbind, valid_untreated))) > 0) * (1:length(valid_treated))
 
       # skip if no valid datasources
       if (sum(valid_datasources_g_t) == 0) {
@@ -292,47 +292,55 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
         )
       }
 
+      #--------------------------
+
+      datasources_untreated <- datasources_subsetted[as.vector(do.call(rbind, ds.enoughIndividuals("df_g",
+                                                                        colname = gname,
+                                                                        value = "0",
+                                                                        datasources = datasources_subsetted)))]
 
 
       # subset created to only non-treated data frame (currently df[,gname] == 0) for linear regression
       dsBaseClient::ds.dataFrameSubset(
         df.name = "df_analysis", V1.name = paste0("df_analysis$", gname), V2.name = "0",
         Boolean.operator = "==", newobj = "df_analysis_non_treated",
-        datasources = datasources_subsetted
+        datasources = datasources_untreated
       )
 
       if (!is.null(xformla)) { # compute expectation
         # run linear regression -> E(delta_y|X, G = 0)
-        linear_regression_object <- try({dsBaseClient::ds.glm(formula_linear_model,
+        linear_regression_object <- #try({
+          dsBaseClient::ds.glm(formula_linear_model,
           data = "df_analysis_non_treated",
           family = "gaussian",
           maxit = maxit,
-          datasources=datasources_subsetted)
+          datasources=datasources_untreated)
 
           betas_lin_reg <- linear_regression_object$coefficients[, c(1)]
-          })
+          #})
 
-        if(class(linear_regression_object) == "try-error") {
-          X_T_X <- Reduce("+", ds.computeMatrixCrossproduct("covariates_one",
-                                                datasources_subsetted))
-          covs <- c()
-          mean_y_temp <- ds.mean("df_analysis$delta_y", type="combined",
-                                 datasources = datasources_subsetted)$Global.Mean[1]
-          for (i in labels(terms(formula_linear_model))){
-            cov_temp <- ds.cov("df_analysis$delta_y", paste0("df_analysis$", i),
-                               type="combine",
-                               datasources = datasources_subsetted)
-            n_temp <- cov_temp$`Number of complete cases used`[2,1]
+        #if(class(linear_regression_object) == "try-error") {
+        #  k <<- k + 1
+        #  X_T_X <- Reduce("+", ds.computeMatrixCrossproduct("covariates_one",
+        #                                                    datasources_untreated ))
+        #  covs <- c()
+        #  mean_y_temp <- ds.mean("df_analysis$delta_y", type="combined",
+        #                         datasources = datasources_untreated )$Global.Mean[1]
+        #  for (i in labels(terms(formula_linear_model))){
+        #    cov_temp <- ds.cov("df_analysis$delta_y", paste0("df_analysis$", i),
+        #                       type="combine",
+        #                       datasources = datasources_untreated)
+        #    n_temp <- cov_temp$`Number of complete cases used`[2,1]
 
-            mean_x <- ds.mean(paste0("df_analysis$", i), type="combined",
-                              datasources = datasources_subsetted)$Global.Mean[1]
+        #    mean_x <- ds.mean(paste0("df_analysis$", i), type="combined",
+        #                      datasources = datasources_untreated )$Global.Mean[1]
 
-            covs <- c(covs, cov_temp$`Variance-Covariance Matrix`[2,1]*(n_temp-1) + n_temp * mean_x * mean_y_temp )
-          }
+        #    covs <- c(covs, cov_temp$`Variance-Covariance Matrix`[2,1]*(n_temp-1) + n_temp * mean_x * mean_y_temp )
+        #  }
 
-          betas_lin_reg <- solve(X_T_X) %*% as.matrix(covs)
+        #  betas_lin_reg <- solve(X_T_X) %*% as.matrix(covs)
 
-        }
+        #}
 
         ds.multiplyMatrixMatrix("covariates_one", betas_lin_reg,
                                 newobj = "delta_y_fitted",
@@ -343,7 +351,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
 
         mean_delta_y <- dsBaseClient::ds.mean("df_analysis_non_treated$delta_y",
           type = "combined",
-          datasources = datasources_subsetted
+          datasources = datasources_untreated
         )$Global.Mean[1]
         dsBaseClient::ds.rep(
           x1 = eval(paste(mean_delta_y)),
@@ -363,7 +371,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
         #dsBaseClient::ds.asMatrix("delta_y_fitted", newobj = "delta_y_fitted", datasources = datasources_subsetted)
       }
 
-      dsBaseClient::ds.asNumeric(x.name = "delta_y_fitted", newobj = "delta_y_fitted", datasources = datasources_subsetted)
+      dsBaseClient::ds.asNumeric(x.name = "delta_y_fitted", newobj = "delta_y_fitted", datasources = datasources_untreated)
 
       # run logit regression on P(G=g |X, G_g + C = 1) -> only treated in g or never treated (observations in df_analysis)
       ds.recode(paste0("df_analysis$", gname),
@@ -434,15 +442,12 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
           datasources = datasources_subsetted
         )
 
-        dsBaseClient::ds.make("odds * (delta_y_fitted)", "att_cont",
+        dsBaseClient::ds.make("df_analysis_logit$G_dummy * (delta_y_fitted)", "att_cont",
           datasources = datasources_subsetted
         )
       } else if (est_method == "dr") {
 
         # treatment and control group for dr estimator
-
-
-
         dsBaseClient::ds.make("df_analysis_logit$G_dummy * (delta_y - delta_y_fitted)", "att_treat",
           datasources = datasources_subsetted
         )
@@ -483,7 +488,13 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       )$Global.Mean[1]
 
       eta_treat <- mean_att_treat / mean_G
-      eta_cont <- mean_att_cont / mean_odds
+
+      if (est_method %in% c("ipw", "dr")){
+        eta_cont <- mean_att_cont / mean_odds
+      } else {
+        eta_cont <- mean_att_cont / mean_G
+      }
+
       dr_att <- eta_treat - eta_cont # compute estimate
       #-------------------------------------------------------------------------
 
@@ -521,7 +532,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       crossproduct_AX <- Reduce("+", ds.computeMatrixCrossproduct("wols_x",
         datasources = datasources_subsetted
       ))
-      XpX_inv <- solve(crossproduct_AX / n)
+      XpX_inv <- qr.solve(crossproduct_AX / n) #use qr.solve
       XpX_vector <- as.vector(XpX_inv)
       nrows <- nrow(XpX_inv)
 
@@ -638,10 +649,17 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       ds.sendToServer(eta_cont, newobj = "eta_cont_server",
                       datasources = datasources_subsetted)
 
-      dsBaseClient::ds.make("(att_cont - odds * eta_cont_server)",
-        newobj = "inf_cont_1",
-        datasources = datasources_subsetted
-      )
+      if (est_method %in% c("dr", "ipw")){
+        dsBaseClient::ds.make("(att_cont - odds * eta_cont_server)",
+          newobj = "inf_cont_1",
+          datasources = datasources_subsetted
+        )
+      } else {
+        dsBaseClient::ds.make("(att_cont - df_analysis_logit$G_dummy * eta_cont_server)",
+                              newobj = "inf_cont_1",
+                              datasources = datasources_subsetted
+        )
+      }
       # inf.cont.1 <- (dr.att.cont - w.cont * eta.cont)
 
 
@@ -690,7 +708,7 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
       # Now the influence function related to estimation effect of pscores
 
       if (est_method == "reg") {
-        ds.multiplyMatrixMatrix("asy_lin_rep_wols", means_M2,
+        ds.multiplyMatrixMatrix("asy_lin_rep_wols", means_M1,
           newobj = "inf_cont_2",
           datasources = datasources_subsetted
         )
@@ -768,16 +786,26 @@ ds.did <- function(data = NULL, yname = NULL, tname = NULL, idname = NULL, gname
         dsBaseClient::ds.make("inf_treat_1_G - inf_treat_2_G - inf_cont_helper_p + inf_cont_3_p",
                 newobj="dr_att_inf_func", datasources = datasources_subsetted)
 
-        } else if (est_method %in% c("ipw", "reg")) {
+        } else if (est_method == "ipw") {
+
         dsBaseClient::ds.make(paste0("inf_treat_1 / ", mean_G),
                 newobj = "inf_treat", datasources = datasources_subsetted)
-        dsBaseClient::ds.make(paste0("inf_cont_helper / ", odds_mean),
-                newobj = "inf_control", datasources = datasources_subsetted)
 
+          dsBaseClient::ds.make(paste0("inf_cont_helper / ", odds_mean),
+                newobj = "inf_control", datasources = datasources_subsetted)
 
         dsBaseClient::ds.make("inf_treat_1_G - inf_cont_helper_p ",
                 newobj="dr_att_inf_func", datasources = datasources_subsetted)
-      }
+
+        } else if (est_method == "reg") {
+
+          dsBaseClient::ds.make(paste0("inf_cont_helper / ", mean_G),
+                                newobj = "inf_control", datasources = datasources_subsetted)
+
+          dsBaseClient::ds.make("inf_treat_1_G - inf_control ",
+                                newobj="dr_att_inf_func", datasources = datasources_subsetted)
+        }
+
       #-----------------------------------------------------------------------------
       # create empty matrix with all ids for influence
       n_columns <- length(t_periods) * length(g_periods)
