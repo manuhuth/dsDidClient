@@ -10,7 +10,7 @@ Authors@R: c(
            email = "manuel.huth@yahoo.com"),
     person(given = "Carolina",
            family = "Alvarez Garavito",
-           role = "aut")
+           role = "aut"))
 Description: We propose dsDid, a federated learning package implemented in DataSHIELD with a federated version of the DID approach of Callaway and Sant'Anna (2022) at its core. It allows for the federated estimation of treatment effects per period and the corresponding federated uncertainty quantification. 
 License: GPL (>= 3)
 Encoding: UTF-8
