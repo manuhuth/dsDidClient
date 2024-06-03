@@ -50,6 +50,7 @@ jobs:
       - name: Add dsBaseClient repository
         run: |
           install.packages('dsBaseClient', repos= 'http://cran.datashield.org', dependencies=TRUE)
+          install.packages('rpart)
           install.packages('dsBase', repos= 'http://cran.datashield.org', dependencies=TRUE)
         shell: Rscript {0}
 
