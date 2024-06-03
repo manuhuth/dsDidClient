@@ -6,9 +6,8 @@
 #' @param datasources A list of data sources to assign the new object to. If not provided, all available connections will be used.
 #' @export
 ds.addColumnOnes <- function(x, columns,
-                       newobj = NULL,
-                       datasources = NULL){
-
+                             newobj = NULL,
+                             datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -16,5 +15,4 @@ ds.addColumnOnes <- function(x, columns,
   # first call
   cally <- call("addColumnOnesDS", x, columns)
   result <- DSI::datashield.assign.expr(datasources, newobj, cally)
-
 }

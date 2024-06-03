@@ -7,9 +7,8 @@
 #'
 #' @return The computed odds as a DataSHIELD object.
 ds.computeOdds <- function(name_propensities, name_C,
-                       newobj = NULL,
-                       datasources = NULL){
-
+                           newobj = NULL,
+                           datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -18,6 +17,5 @@ ds.computeOdds <- function(name_propensities, name_C,
   cally <- call("computeOddsDS", name_propensities, name_C)
   result <- DSI::datashield.assign.expr(datasources, newobj, cally)
 
-  #return("Generate Propensity scores serverside")
-
+  # return("Generate Propensity scores serverside")
 }

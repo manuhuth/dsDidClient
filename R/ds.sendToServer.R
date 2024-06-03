@@ -6,9 +6,8 @@
 
 #' @export
 ds.sendToServer <- function(x,
-                                    newobj = NULL,
-                                    datasources = NULL){
-
+                            newobj = NULL,
+                            datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -16,5 +15,4 @@ ds.sendToServer <- function(x,
   # first call
   cally <- call("sendToServerDS", x)
   result <- DSI::datashield.assign.expr(datasources, newobj, cally)
-
 }

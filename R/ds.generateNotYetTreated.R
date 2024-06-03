@@ -8,17 +8,18 @@
 #' @param datasources A specific Datashield data source to which the result should be assigned.
 #' @export
 ds.generateNotYetTreated <- function(df, name_variable, t, g,
-                      newobj,
-                      datasources = NULL){
-
+                                     newobj,
+                                     datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
 
 
   # second call
-  cally2 <- call("generateNotYetTreatedDS",
-                 df, name_variable, t, g)
+  cally2 <- call(
+    "generateNotYetTreatedDS",
+    df, name_variable, t, g
+  )
   result <- DSI::datashield.assign.expr(datasources, newobj, cally2)
 
   return(result)

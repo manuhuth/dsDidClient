@@ -1,11 +1,17 @@
 Package: dsDidClient
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Federated Difference-in-Difference estimation
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: Manul Huth <manuel.huth@helmholtz-muenchen.de>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Date: 2023-4-27
+Authors@R: c(
+    person(given = "Manuel",
+           family = "Huth",
+           role = c("aut", "cre"),
+           email = "manuel.huth@yahoo.com"),
+    person(given = "Carolina",
+           family = "Alvarez Garavito",
+           role = "aut")
+Description: We propose dsDid, a federated learning package implemented in DataSHIELD with a federated version of the DID approach of Callaway and Sant'Anna (2022) at its core. It allows for the federated estimation of treatment effects per period and the corresponding federated uncertainty quantification. 
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true

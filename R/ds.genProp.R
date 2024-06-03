@@ -14,8 +14,7 @@ ds.genProp <- function(form,
                        constant_in_matrix = FALSE,
                        newobj = "propscore",
                        datasources = NULL,
-                       invlog = TRUE){
-
+                       invlog = TRUE) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -23,7 +22,6 @@ ds.genProp <- function(form,
   # form is a string
 
   # first call
-  cally <- call("genPropDS", form, coefficients, object, invlog, constant_in_matrix )
+  cally <- call("genPropDS", form, coefficients, object, invlog, constant_in_matrix)
   DSI::datashield.assign.expr(datasources, newobj, cally)
-
 }

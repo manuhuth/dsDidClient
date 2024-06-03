@@ -6,8 +6,7 @@
 #' @param datasources A specific Datashield data source to which the result should be assigned.
 #' @export
 ds.enoughIndividuals <- function(df, colname, value,
-                                datasources = NULL){
-
+                                 datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -15,5 +14,4 @@ ds.enoughIndividuals <- function(df, colname, value,
   # first call
   cally <- call("enoughIndividualsDS", df, colname, value)
   result <- DSI::datashield.aggregate(datasources, cally)
-
 }

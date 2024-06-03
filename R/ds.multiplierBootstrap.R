@@ -5,8 +5,7 @@
 #' @param datasources A specific Datashield data source to which the result should be assigned.
 #' @export
 ds.multiplierBootstrap <- function(matrix, n_iterations,
-                                  datasources = NULL){
-
+                                   datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -14,5 +13,4 @@ ds.multiplierBootstrap <- function(matrix, n_iterations,
   # first call
   cally <- call("multiplierBootstrapDS", matrix, n_iterations)
   result <- DSI::datashield.aggregate(datasources, cally)
-
 }

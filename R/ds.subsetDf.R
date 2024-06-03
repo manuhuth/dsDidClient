@@ -8,17 +8,18 @@
 #' @param datasources A specific Datashield data source to which the result should be assigned.
 
 #' @export
-ds.subsetDf<- function(df, name_variable, value, include_zero,
-                      newobj,
-                      datasources = NULL){
-
+ds.subsetDf <- function(df, name_variable, value, include_zero,
+                        newobj,
+                        datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
 
 
   # second call
-  cally2 <- call("genDfSubsetDS",
-                 df, name_variable, value, include_zero)
+  cally2 <- call(
+    "genDfSubsetDS",
+    df, name_variable, value, include_zero
+  )
   DSI::datashield.assign.expr(datasources, newobj, cally2)
 }

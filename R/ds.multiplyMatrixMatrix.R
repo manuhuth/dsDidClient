@@ -10,18 +10,18 @@
 #' @param datasources A specific Datashield data source to which the result should be assigned.
 
 #' @export
-ds.multiplyMatrixMatrix <- function(matrix1, matrix2, nrow1=NULL, ncol1=NULL,
-                                    nrow2=NULL, ncol2=NULL,
+ds.multiplyMatrixMatrix <- function(matrix1, matrix2, nrow1 = NULL, ncol1 = NULL,
+                                    nrow2 = NULL, ncol2 = NULL,
                                     newobj = NULL,
-                                    datasources = NULL){
-
+                                    datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
 
   # first call
-  cally <- call("multiplyMatrixMatrixDS", matrix1, matrix2, nrow1, ncol1,
-                nrow2, ncol2)
+  cally <- call(
+    "multiplyMatrixMatrixDS", matrix1, matrix2, nrow1, ncol1,
+    nrow2, ncol2
+  )
   result <- DSI::datashield.assign.expr(datasources, newobj, cally)
-
 }

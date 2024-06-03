@@ -8,8 +8,7 @@
 #' @export
 ds.multiplyMatrixScalar <- function(matrix, scalar,
                                     newobj = NULL,
-                                    datasources = NULL){
-
+                                    datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -17,5 +16,4 @@ ds.multiplyMatrixScalar <- function(matrix, scalar,
   # first call
   cally <- call("multiplyMatrixScalarDS", matrix, scalar)
   result <- DSI::datashield.assign.expr(datasources, newobj, cally)
-
 }

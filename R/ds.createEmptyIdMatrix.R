@@ -7,9 +7,8 @@
 #' @param datasources A specific Datashield data source to which the result should be assigned.
 #' @export
 ds.createEmptyIdMatrix <- function(df, idname, n_columns,
-                                  newobj = NULL,
-                                  datasources = NULL){
-
+                                   newobj = NULL,
+                                   datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -17,5 +16,4 @@ ds.createEmptyIdMatrix <- function(df, idname, n_columns,
   # first call
   cally <- call("createEmptyIdMatrixDS", df, idname, n_columns)
   DSI::datashield.assign.expr(datasources, newobj, cally)
-
 }

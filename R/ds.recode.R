@@ -7,9 +7,8 @@
 #' @param datasources A specific Datashield data source to which the result should be assigned.
 #' @export
 ds.recode <- function(x, replace_with, replace,
-                                  newobj = NULL,
-                                  datasources = NULL){
-
+                      newobj = NULL,
+                      datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -17,5 +16,4 @@ ds.recode <- function(x, replace_with, replace,
   # first call
   cally <- call("recodeDS", x, replace_with, replace)
   DSI::datashield.assign.expr(datasources, newobj, cally)
-
 }

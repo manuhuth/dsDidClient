@@ -3,8 +3,7 @@
 #' @param datasources connection
 #' @export
 ds.buildHelper <- function(x,
-                       datasources = NULL){
-
+                           datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -12,5 +11,4 @@ ds.buildHelper <- function(x,
   # first call
   cally <- call("buildHelperDS", x)
   result <- DSI::datashield.aggregate(datasources, cally)
-
 }

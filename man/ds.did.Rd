@@ -2,7 +2,7 @@
 % Please edit documentation in R/ds.did.R
 \name{ds.did}
 \alias{ds.did}
-\title{clusterInfluenceFunction}
+\title{Average treatment effect of the treated estimation}
 \usage{
 ds.did(
   data = NULL,
@@ -66,7 +66,7 @@ ds.did(
 
 \item{datasources}{A specific Datashield data source to which the result should be assigned.}
 
-\item{clear_console}{If TRUE, the coinsole is yleared at certain stages.}
+\item{clear_console}{If TRUE, the console is cleared at certain stages.}
 }
 \description{
 The function calculates the influence of a cluster of variables on a target variable using an influence matrix on the server side.lows for the option to assign the result to a new object or a specific data source.

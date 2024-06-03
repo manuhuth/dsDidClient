@@ -4,8 +4,7 @@
 #' @param datasources A specific Datashield data source to which the result should be assigned.
 #' @export
 ds.computeMatrixCrossproduct <- function(x,
-                       datasources = NULL){
-
+                                         datasources = NULL) {
   if (is.null(datasources)) {
     datasources <- DSI::datashield.connections_find()
   }
@@ -13,5 +12,4 @@ ds.computeMatrixCrossproduct <- function(x,
   # first call
   cally <- call("computeMatrixCrossproductDS", x)
   result <- DSI::datashield.aggregate(datasources, cally)
-
 }
