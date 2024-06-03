@@ -9,7 +9,7 @@
 library(testthat)
 library(dsDidClient)
 install.packages("dsBaseClient", repos = "http://cran.datashield.org", dependencies = TRUE)
-install.packages("dsBase", repos = "http://cran.datashield.org")
+install.packages("dsBase", repos = "http://cran.datashield.org", dependencies = TRUE)
 install.packages("DSLite")
 install.packages("devtools")
 #install.packages("rpart")
