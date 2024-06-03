@@ -8,11 +8,11 @@
 
 library(testthat)
 library(dsDidClient)
-install.packages("dsBaseClient", repos = "http://cran.datashield.org", dependencies = TRUE)
-install.packages("dsBase", repos = "http://cran.datashield.org", dependencies = TRUE)
+#install.packages("dsBaseClient", repos = "http://cran.datashield.org", dependencies = TRUE)
+#install.packages("dsBase", repos = "http://cran.datashield.org", dependencies = TRUE)
 install.packages("DSLite", repos = "http://cran.us.r-project.org")
 install.packages("devtools", repos = "http://cran.us.r-project.org")
-#install.packages("rpart")
+#install.packages("rpart", repos = "http://cran.us.r-project.org")
 library(devtools)
 devtools::install_github("manuhuth/dsDid")
 # devtools::install_github("manuhuth/dsDidClient") #
