@@ -8,7 +8,6 @@
 
 library(testthat)
 library(dsDidClient)
-install.packages("reshape2", repos = "http://cran.us.r-project.org")
 install.packages("dsBaseClient", repos = "http://cran.datashield.org", dependencies = TRUE)
 install.packages("dsBase", repos = "http://cran.datashield.org", dependencies = TRUE)
 install.packages("DSLite", repos = "http://cran.us.r-project.org")
