@@ -8,8 +8,8 @@
 
 library(testthat)
 library(dsDidClient)
-install.packages("dsBaseClient", repos = "http://cran.datashield.org", dependencies = TRUE)
-install.packages("dsBase", repos = "http://cran.datashield.org", dependencies = TRUE)
+#install.packages("dsBaseClient", repos = "http://cran.datashield.org", dependencies = TRUE)
+#install.packages("dsBase", repos = "http://cran.datashield.org")
 install.packages("DSLite", repos = "http://cran.us.r-project.org")
 install.packages("devtools", repos = "http://cran.us.r-project.org")
 library(devtools)
